@@ -4,11 +4,10 @@ Dupire Local Volatility Extraction Engine.
 
 from __future__ import annotations
 
-from typing import Tuple, Optional
 import numpy as np
 
-from kuwala.diagnostics.arbitrage import durrleman_g
 from kuwala._core import get_rust_core, has_rust_core
+from kuwala.diagnostics.arbitrage import durrleman_g
 
 
 def extract_dupire_local_volatility(

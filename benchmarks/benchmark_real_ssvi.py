@@ -5,9 +5,10 @@ Measures multi-start global optimization calibration throughput and convergence.
 """
 
 import time
+
 import numpy as np
-import kuwala
-from kuwala.volatility.ssvi import calibrate_ssvi, CalibrationConfig
+
+from kuwala.volatility.ssvi import CalibrationConfig, calibrate_ssvi
 
 
 def benchmark_real_ssvi():
@@ -27,7 +28,7 @@ def benchmark_real_ssvi():
         iv_dict = {}
         for t in expiries:
             k = np.linspace(-0.30, 0.30, 25)
-            iv = 0.20 + 0.08 * (k ** 2) - 0.04 * k + np.random.normal(0, 0.002, len(k))
+            iv = 0.20 + 0.08 * (k**2) - 0.04 * k + np.random.normal(0, 0.002, len(k))
             log_k_dict[t] = k
             iv_dict[t] = np.maximum(0.05, iv)
 
@@ -41,7 +42,9 @@ def benchmark_real_ssvi():
 
     avg_ms = (total_time / n_surfaces) * 1000
     throughput = n_surfaces / total_time
-    print(f"Surfaces: {n_surfaces} | Total Time: {total_time:.2f} s | Avg Time: {avg_ms:.2f} ms/surface | Throughput: {throughput:.1f} surfaces/sec | Convergence: {converged/n_surfaces*100:.1f}%")
+    print(
+        f"Surfaces: {n_surfaces} | Total Time: {total_time:.2f} s | Avg Time: {avg_ms:.2f} ms/surface | Throughput: {throughput:.1f} surfaces/sec | Convergence: {converged / n_surfaces * 100:.1f}%"
+    )
     print("=" * 65)
 
 

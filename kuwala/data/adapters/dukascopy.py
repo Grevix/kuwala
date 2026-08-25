@@ -5,11 +5,11 @@ Dukascopy Tick Data & Decoupled OHLCV Aggregation Adapter.
 from __future__ import annotations
 
 from typing import Optional
+
 import numpy as np
 import pandas as pd
 
 from kuwala.data.adapters.base import BaseAdapter
-from kuwala.data.conventions import to_utc_datetime
 
 
 class DukascopyAdapter(BaseAdapter):
@@ -45,14 +45,16 @@ class DukascopyAdapter(BaseAdapter):
         )
         n = len(dates)
         price_walk = 1.0850 + np.cumsum(np.random.normal(0, 0.0001, size=n))
-        ticks = pd.DataFrame({
-            "timestamp": dates,
-            "bid": price_walk - 0.0001,
-            "ask": price_walk + 0.0001,
-            "bid_vol": 1.0,
-            "ask_vol": 1.0,
-            "symbol": symbol.upper(),
-        })
+        ticks = pd.DataFrame(
+            {
+                "timestamp": dates,
+                "bid": price_walk - 0.0001,
+                "ask": price_walk + 0.0001,
+                "bid_vol": 1.0,
+                "ask_vol": 1.0,
+                "symbol": symbol.upper(),
+            }
+        )
         return ticks
 
 
@@ -76,7 +78,7 @@ def aggregate_ticks_to_ohlcv(
     df = df.set_index("timestamp").sort_index()
 
     volume_col = "bid_vol" if "bid_vol" in df.columns else None
-    
+
     ohlc = df[price_col].resample(freq).ohlc()
     if volume_col and volume_col in df.columns:
         vol = df[volume_col].resample(freq).sum()

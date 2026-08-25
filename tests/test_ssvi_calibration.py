@@ -1,7 +1,6 @@
-import pytest
-import numpy as np
 import kuwala
-from kuwala.volatility import SsviSurface, CalibrationConfig
+from kuwala.volatility import CalibrationConfig, SsviSurface
+
 
 def test_ssvi_surface_calibration():
     chain = kuwala.data.fetch("SPY")

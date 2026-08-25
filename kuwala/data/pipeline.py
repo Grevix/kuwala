@@ -4,17 +4,14 @@ Unified Data Pipeline: Fetch -> Clean -> Extract IV -> Store.
 
 from __future__ import annotations
 
-from typing import Optional, Union, List
-import pandas as pd
+from typing import List, Optional
 
-from kuwala.data.adapters.yahoo import YahooAdapter
-from kuwala.data.adapters.fred import FredAdapter
-from kuwala.data.adapters.sec_edgar import SecEdgarAdapter
 from kuwala.data.adapters.dukascopy import DukascopyAdapter
+from kuwala.data.adapters.fred import FredAdapter
 from kuwala.data.adapters.nasdaq import NasdaqDataLinkAdapter
-from kuwala.data.models import OptionChain, OptionQuote, OptionType
-from kuwala.data.store import get_store, DataStore
-
+from kuwala.data.adapters.sec_edgar import SecEdgarAdapter
+from kuwala.data.adapters.yahoo import YahooAdapter
+from kuwala.data.models import OptionChain, OptionQuote
 
 ADAPTERS = {
     "yahoo": YahooAdapter(),

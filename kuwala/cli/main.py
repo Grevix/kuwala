@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import typer
 from rich.console import Console
-from rich.table import Table
 
 app = typer.Typer(help="Kuwala Quantitative Options & Volatility CLI")
 console = Console()
@@ -16,6 +15,7 @@ console = Console()
 def version():
     """Print the installed Kuwala version."""
     import kuwala
+
     console.print(f"[bold green]Kuwala version:[/bold green] {kuwala.__version__}")
 
 
@@ -26,6 +26,7 @@ def fetch(
 ):
     """Fetch options chain for a symbol and print summary."""
     import kuwala
+
     console.print(f"[cyan]Fetching options chain for {symbol} from {source}...[/cyan]")
     chain = kuwala.data.fetch(symbol, source=source)
     console.print(f"[green]Retrieved {len(chain)} option quotes for {symbol} (Spot: ${chain.spot:.2f})[/green]")
@@ -38,6 +39,7 @@ def fit(
 ):
     """Calibrate volatility surface and display arbitrage diagnostics."""
     import kuwala
+
     console.print(f"[cyan]Calibrating {model.upper()} surface for {symbol}...[/cyan]")
     chain = kuwala.data.fetch(symbol)
     surf = kuwala.volatility.surface(chain, model=model)
@@ -52,6 +54,7 @@ def vrp(
 ):
     """Calculate Volatility Risk Premium (VRP)."""
     import kuwala
+
     chain = kuwala.data.fetch(symbol)
     surf = kuwala.volatility.surface(chain)
     vrp_df = kuwala.signals.vrp(surf, realized_window=window)

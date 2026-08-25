@@ -1,7 +1,10 @@
 import math
-import pytest
+
 import numpy as np
+import pytest
+
 import kuwala
+
 
 def test_black_scholes_call_put_parity():
     spot = 100.0
@@ -20,6 +23,7 @@ def test_black_scholes_call_put_parity():
 
     assert pytest.approx(actual_diff, rel=1e-6) == expected_diff
 
+
 def test_black_scholes_known_values():
     # Reference values: S=100, K=100, T=1, r=0.05, q=0, vol=0.20 -> Call = 10.4505756
     call = kuwala.black_scholes(100.0, 100.0, 1.0, 0.05, 0.0, 0.20, is_call=True)
@@ -28,6 +32,7 @@ def test_black_scholes_known_values():
     # Deep ITM Call -> S*exp(-qT) - K*exp(-rT)
     deep_call = kuwala.black_scholes(200.0, 50.0, 0.5, 0.05, 0.0, 0.20, is_call=True)
     assert deep_call > 150.0
+
 
 def test_black76_pricing():
     forward = 100.0
@@ -42,6 +47,7 @@ def test_black76_pricing():
     # C - P = exp(-r*T) * (F - K) = 0 for ATM forward
     assert pytest.approx(call - put, abs=1e-7) == 0.0
     assert call > 0.0
+
 
 def test_black_scholes_vectorized():
     spots = np.array([90.0, 100.0, 110.0])

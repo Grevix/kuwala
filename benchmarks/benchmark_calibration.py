@@ -2,11 +2,12 @@
 Reproducible SSVI Surface Calibration Benchmark Suite.
 """
 
-import time
 import platform
-import numpy as np
+import time
+
 import kuwala
 from kuwala.volatility.ssvi import CalibrationConfig
+
 
 def run_calibration_benchmark():
     print("==========================================================")
@@ -34,6 +35,7 @@ def run_calibration_benchmark():
     print(f"Avg Calibration Time: {avg_ms:.2f} ms / surface")
     print(f"Surface Throughput:   {n_runs / elapsed:.1f} surfaces/sec")
     print("==========================================================")
+
 
 if __name__ == "__main__":
     run_calibration_benchmark()

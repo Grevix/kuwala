@@ -5,7 +5,8 @@ Analytic 1st and 2nd Order Option Greeks.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Union, Sequence
+from typing import Dict, Sequence, Union
+
 import numpy as np
 from scipy.stats import norm
 
@@ -94,7 +95,11 @@ def greeks(
     invalid = ~valid
 
     if np.any(invalid):
-        delta[invalid] = np.where(call_arr[invalid], np.where(s_arr[invalid] > k_arr[invalid], 1.0, 0.0), np.where(s_arr[invalid] < k_arr[invalid], -1.0, 0.0))
+        delta[invalid] = np.where(
+            call_arr[invalid],
+            np.where(s_arr[invalid] > k_arr[invalid], 1.0, 0.0),
+            np.where(s_arr[invalid] < k_arr[invalid], -1.0, 0.0),
+        )
 
     if np.any(valid):
         s = s_arr[valid]
@@ -133,8 +138,10 @@ def greeks(
 
         charm_val = np.where(
             is_c,
-            q_val * df_q * cdf_d1 - df_q * pdf_d1 * (2.0 * (r_val - q_val) * t_val - d2 * vol_sqrt_t) / (2.0 * t_val * vol_sqrt_t),
-            -q_val * df_q * norm.cdf(-d1) - df_q * pdf_d1 * (2.0 * (r_val - q_val) * t_val - d2 * vol_sqrt_t) / (2.0 * t_val * vol_sqrt_t),
+            q_val * df_q * cdf_d1
+            - df_q * pdf_d1 * (2.0 * (r_val - q_val) * t_val - d2 * vol_sqrt_t) / (2.0 * t_val * vol_sqrt_t),
+            -q_val * df_q * norm.cdf(-d1)
+            - df_q * pdf_d1 * (2.0 * (r_val - q_val) * t_val - d2 * vol_sqrt_t) / (2.0 * t_val * vol_sqrt_t),
         )
 
         delta[valid] = delta_val

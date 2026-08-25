@@ -8,6 +8,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+
 from dotenv import load_dotenv
 
 # Automatically find and load .env file
@@ -38,9 +39,7 @@ class KuwalaConfig:
             or os.getenv("Nasdaq_Data_Link_API_key")
             or os.getenv("KUWALA_NASDAQ_DATA_LINK_API_KEY")
         )
-        sec_ua = os.getenv(
-            "SEC_EDGAR_USER_AGENT", "KuwalaResearch/0.1.0 (contact@kuwala.org)"
-        )
+        sec_ua = os.getenv("SEC_EDGAR_USER_AGENT", "KuwalaResearch/0.1.0 (contact@kuwala.org)")
         custom_data_dir = os.getenv("KUWALA_DATA_DIR")
         data_path = Path(custom_data_dir) if custom_data_dir else Path.home() / ".kuwala" / "data"
         data_path.mkdir(parents=True, exist_ok=True)

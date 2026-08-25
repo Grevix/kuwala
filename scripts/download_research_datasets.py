@@ -3,14 +3,12 @@ Kuwala Research Datasets Downloader & Ingestion Script (Optimized Streaming & In
 ======================================================================================
 """
 
-import os
-import sys
 import json
-import time
 import shutil
+import time
 from pathlib import Path
+
 import pandas as pd
-import numpy as np
 
 DATA_DIR = Path("research/data")
 DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -34,8 +32,10 @@ def index_kaggle_datasets():
             p = Path(path)
             csv_files = list(p.glob("**/*.csv")) + list(p.glob("**/*.parquet"))
             total_size = sum(f.stat().st_size for f in csv_files)
-            print(f"  [SUCCESS] {name} indexed from {path} ({len(csv_files)} files, {total_size/(1024*1024):.1f} MB)")
-            
+            print(
+                f"  [SUCCESS] {name} indexed from {path} ({len(csv_files)} files, {total_size / (1024 * 1024):.1f} MB)"
+            )
+
             # Copy main files into research/data/
             copied_files = []
             for f in csv_files[:5]:
@@ -90,7 +90,7 @@ def stream_huggingface_datasets():
                 samples.append(row)
                 if i >= 500:
                     break
-            
+
             sample_df = pd.DataFrame(samples)
             sample_file = DATA_DIR / f"{name}_sample.parquet"
             sample_df.to_parquet(sample_file)
@@ -141,12 +141,14 @@ def download_fred_macro_data():
             df = fred.fetch(sid, observation_start="2000-01-01")
             file_path = DATA_DIR / f"fred_{sid}.parquet"
             df.to_parquet(file_path)
-            print(f"  [SUCCESS] FRED {sid} ({desc}): {len(df):,} rows from {df['date'].min().strftime('%Y-%m-%d')} to {df['date'].max().strftime('%Y-%m-%d')}")
+            print(
+                f"  [SUCCESS] FRED {sid} ({desc}): {len(df):,} rows from {df['date'].min().strftime('%Y-%m-%d')} to {df['date'].max().strftime('%Y-%m-%d')}"
+            )
             fred_results[sid] = {
                 "description": desc,
                 "rows": len(df),
-                "start": str(df["date"].min().strftime('%Y-%m-%d')),
-                "end": str(df["date"].max().strftime('%Y-%m-%d')),
+                "start": str(df["date"].min().strftime("%Y-%m-%d")),
+                "end": str(df["date"].max().strftime("%Y-%m-%d")),
                 "file": str(file_path),
             }
         except Exception as e:

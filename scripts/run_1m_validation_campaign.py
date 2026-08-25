@@ -6,23 +6,22 @@ Pricing, Implied Volatility, Analytic Greeks, Surface Arbitrage, Realized Vol,
 and Data Storage Roundtrips.
 """
 
-import time
 import json
-import psutil
 import os
+import time
+
 import numpy as np
 import pandas as pd
-import kuwala
-from kuwala.pricing.black_scholes import black_scholes
-from kuwala.pricing.black76 import black76
-from kuwala.pricing.greeks import greeks
-from kuwala.volatility.iv import implied_volatility
-from kuwala.volatility.ssvi import SsviParameters, calibrate_ssvi, CalibrationConfig
-from kuwala.diagnostics.arbitrage import durrleman_g, check_butterfly_slice
-from kuwala.volatility.local_vol import extract_dupire_local_volatility
-from kuwala.signals.realized_vol import realized_volatility, RealizedVolEstimator
+import psutil
+
+from kuwala.data.conventions import to_utc_datetime
 from kuwala.data.models import OptionChain, OptionQuote, OptionType
-from kuwala.data.conventions import year_fraction, to_utc_datetime
+from kuwala.diagnostics.arbitrage import check_butterfly_slice
+from kuwala.pricing.black_scholes import black_scholes
+from kuwala.pricing.greeks import greeks
+from kuwala.signals.realized_vol import RealizedVolEstimator, realized_volatility
+from kuwala.volatility.iv import implied_volatility
+from kuwala.volatility.ssvi import SsviParameters
 
 
 def run_1m_campaign():
@@ -101,7 +100,9 @@ def run_1m_campaign():
     total_cases += N_iv
     all_iv_errors.extend(iv_err[~nan_mask])
 
-    print(f"      -> 300,000 IV Round-Trips Complete. Solved Mean Error: {np.mean(iv_err[~nan_mask]):.2e}, Max Error: {np.max(iv_err[~nan_mask]):.2e}")
+    print(
+        f"      -> 300,000 IV Round-Trips Complete. Solved Mean Error: {np.mean(iv_err[~nan_mask]):.2e}, Max Error: {np.max(iv_err[~nan_mask]):.2e}"
+    )
 
     # -------------------------------------------------------------
     # SECTION 3: 150,000 Analytic Greeks vs Finite Differences
@@ -157,7 +158,7 @@ def run_1m_campaign():
     passed_cases += int(np.sum(valid_prop))
     failed_cases += int(np.sum(~valid_prop))
     total_cases += N_prop
-    print(f"      -> 100,000 Invariant Cases Complete. Monotonicity Compliance: 100.0%")
+    print("      -> 100,000 Invariant Cases Complete. Monotonicity Compliance: 100.0%")
 
     # -------------------------------------------------------------
     # SECTION 5: 50,000 Surface, SSVI & Durrleman Diagnostics
@@ -165,8 +166,8 @@ def run_1m_campaign():
     print("\n[5/7] Executing 50,000 Surface & Durrleman Arbitrage Cases...")
     N_surf = 50_000
     k_grid = np.linspace(-0.35, 0.35, 100)
-    theta_vals = np.random.uniform(0.01, 0.50, 500) # 500 surfaces x 100 strikes = 50,000 points
-    
+    theta_vals = np.random.uniform(0.01, 0.50, 500)  # 500 surfaces x 100 strikes = 50,000 points
+
     surf_valid_count = 0
     for th in theta_vals:
         rho = -0.35
@@ -174,7 +175,7 @@ def run_1m_campaign():
         gamma = 0.45
         params = SsviParameters(rho=rho, eta=eta, gamma=gamma, theta_map={1.0: th})
         w_vals = params.total_variance(k_grid, th)
-        
+
         # Check butterfly Durrleman condition on slice
         rep = check_butterfly_slice(1.0, k_grid, w_vals)
         if rep.butterfly_passed:
@@ -183,9 +184,9 @@ def run_1m_campaign():
             surf_valid_count += len(k_grid) - len(rep.violations)
 
     passed_cases += surf_valid_count
-    failed_cases += (N_surf - surf_valid_count)
+    failed_cases += N_surf - surf_valid_count
     total_cases += N_surf
-    print(f"      -> 50,000 Surface Evaluation Points Complete.")
+    print("      -> 50,000 Surface Evaluation Points Complete.")
 
     # -------------------------------------------------------------
     # SECTION 6: 50,000 Realized Volatility Estimator Cases
@@ -199,30 +200,30 @@ def run_1m_campaign():
 
     for _ in range(n_paths):
         rets = np.random.normal(0.0003, 0.015, path_len)
-        c = 100.0 * np.exp(np.cumsum(rets))
-        h = c * (1.0 + np.abs(np.random.normal(0, 0.005, path_len)))
-        l = c * (1.0 - np.abs(np.random.normal(0, 0.005, path_len)))
-        o = c * (1.0 + np.random.normal(0, 0.002, path_len))
+        close_p = 100.0 * np.exp(np.cumsum(rets))
+        high_p = close_p * (1.0 + np.abs(np.random.normal(0, 0.005, path_len)))
+        low_p = close_p * (1.0 - np.abs(np.random.normal(0, 0.005, path_len)))
+        open_p = close_p * (1.0 + np.random.normal(0, 0.002, path_len))
 
-        df_path = pd.DataFrame({"open": o, "high": h, "low": l, "close": c})
+        df_path = pd.DataFrame({"open": open_p, "high": high_p, "low": low_p, "close": close_p})
         rv_gk = realized_volatility(df_path, window=20, estimator=RealizedVolEstimator.GARMAN_KLASS)
         rv_rs = realized_volatility(df_path, window=20, estimator=RealizedVolEstimator.ROGERS_SATCHELL)
         rv_pk = realized_volatility(df_path, window=20, estimator=RealizedVolEstimator.PARKINSON)
 
         # Invariant: all realized vol estimates must be strictly non-negative and finite
         valid_path = (
-            (rv_gk.dropna() >= 0.0).all() and
-            (rv_rs.dropna() >= 0.0).all() and
-            (rv_pk.dropna() >= 0.0).all() and
-            (~rv_gk.isna()).any()
+            (rv_gk.dropna() >= 0.0).all()
+            and (rv_rs.dropna() >= 0.0).all()
+            and (rv_pk.dropna() >= 0.0).all()
+            and (~rv_gk.isna()).any()
         )
         if valid_path:
             rv_passed += path_len
 
     passed_cases += rv_passed
-    failed_cases += (N_rv - rv_passed)
+    failed_cases += N_rv - rv_passed
     total_cases += N_rv
-    print(f"      -> 50,000 Realized Volatility Path Evaluations Complete.")
+    print("      -> 50,000 Realized Volatility Path Evaluations Complete.")
 
     # -------------------------------------------------------------
     # SECTION 7: 50,000 Data Model & Normalization Cases
@@ -256,15 +257,15 @@ def run_1m_campaign():
         chain = OptionChain(underlying="SPY", spot=500.0, quotes=quotes)
         df_chain = chain.to_dataframe()
         arrow_tbl = chain.to_arrow()
-        
+
         # Verify schema invariants
         if len(df_chain) == batch_size and arrow_tbl.num_rows == batch_size and "log_moneyness" in df_chain.columns:
             data_passed += batch_size
 
     passed_cases += data_passed
-    failed_cases += (N_data - data_passed)
+    failed_cases += N_data - data_passed
     total_cases += N_data
-    print(f"      -> 50,000 Data Normalization & Arrow Cases Complete.")
+    print("      -> 50,000 Data Normalization & Arrow Cases Complete.")
 
     # -------------------------------------------------------------
     # Aggregate Metrics & Performance
@@ -282,7 +283,7 @@ def run_1m_campaign():
     print("  CAMPAIGN SUMMARY RESULTS")
     print("=" * 70)
     print(f"Total Test Cases Executed: {total_cases:,}")
-    print(f"Passed:                    {passed_cases:,} ({passed_cases/total_cases*100:.2f}%)")
+    print(f"Passed:                    {passed_cases:,} ({passed_cases / total_cases * 100:.2f}%)")
     print(f"Failed:                    {failed_cases:,}")
     print(f"Total Runtime:             {elapsed_total:.2f} seconds")
     print(f"Throughput:                {total_cases / elapsed_total:,.0f} cases/sec")

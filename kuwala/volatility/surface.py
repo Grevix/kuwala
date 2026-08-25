@@ -5,23 +5,23 @@ First-Class Volatility Surface Research Objects.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
-from typing import List, Dict, Optional, Union, Tuple
+from typing import List, Optional, Union
+
 import numpy as np
 import pandas as pd
 from scipy.interpolate import RegularGridInterpolator, interp1d
 
 from kuwala.data.models import OptionChain
+from kuwala.diagnostics.arbitrage import diagnose_surface
+from kuwala.diagnostics.report import DiagnosticReport
+from kuwala.pricing.greeks import OptionGreeks, greeks
 from kuwala.volatility.iv import extract_chain_iv
+from kuwala.volatility.local_vol import extract_dupire_local_volatility
 from kuwala.volatility.ssvi import (
-    SsviParameters,
     CalibrationConfig,
+    SsviParameters,
     calibrate_ssvi,
 )
-from kuwala.volatility.local_vol import extract_dupire_local_volatility
-from kuwala.diagnostics.report import DiagnosticReport
-from kuwala.diagnostics.arbitrage import diagnose_surface
-from kuwala.pricing.greeks import greeks, OptionGreeks
 
 
 class VolatilitySurface:
@@ -115,7 +115,7 @@ class VolatilitySurface:
         new_spot = self.spot * (1.0 + spot_pct_bump)
         new_iv = np.maximum(0.01, self.iv_matrix + parallel_vol_bump)
         t_col = np.array(self.expiries)[:, np.newaxis]
-        new_w = (new_iv ** 2) * t_col
+        new_w = (new_iv**2) * t_col
         return VolatilitySurface(
             underlying=self.underlying,
             spot=new_spot,
@@ -129,7 +129,6 @@ class VolatilitySurface:
     def plot(self, show: bool = True) -> None:
         """Plot the 3D implied volatility surface."""
         import matplotlib.pyplot as plt
-        from mpl_toolkits.mplot3d import Axes3D
 
         fig = plt.figure(figsize=(10, 6))
         ax = fig.add_subplot(111, projection="3d")
@@ -180,7 +179,7 @@ class SsviSurface(VolatilitySurface):
     ):
         self.params = params
         sorted_exp = sorted(expiries)
-        
+
         n_exp = len(sorted_exp)
         n_k = len(k_grid)
         w_mat = np.zeros((n_exp, n_k), dtype=np.float64)
@@ -212,10 +211,7 @@ class SsviSurface(VolatilitySurface):
         if not obs:
             raise ValueError(f"No valid implied volatility observations found in option chain for {chain.underlying}")
 
-        df = pd.DataFrame([
-            {"ttm": o.ttm, "k": o.log_moneyness, "iv": o.implied_volatility}
-            for o in obs
-        ])
+        df = pd.DataFrame([{"ttm": o.ttm, "k": o.log_moneyness, "iv": o.implied_volatility} for o in obs])
 
         expiries = sorted(df["ttm"].unique().tolist())
         log_moneyness_dict = {}
@@ -257,6 +253,7 @@ def surface(
     """
     if isinstance(chain_or_symbol, str):
         from kuwala.data.pipeline import fetch
+
         chain = fetch(chain_or_symbol, source=source, **kwargs)
     else:
         chain = chain_or_symbol

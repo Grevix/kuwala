@@ -1,6 +1,7 @@
 import pytest
-import numpy as np
+
 import kuwala
+
 
 def test_analytic_vs_finite_difference_greeks():
     spot = 100.0
@@ -20,7 +21,7 @@ def test_analytic_vs_finite_difference_greeks():
     p_mid = kuwala.black_scholes(spot, strike, t, r, q, sigma, is_call=True)
 
     fd_delta = (p_up - p_down) / (2.0 * h_s)
-    fd_gamma = (p_up - 2.0 * p_mid + p_down) / (h_s ** 2)
+    fd_gamma = (p_up - 2.0 * p_mid + p_down) / (h_s**2)
 
     h_v = 1e-5
     p_vol_up = kuwala.black_scholes(spot, strike, t, r, q, sigma + h_v, is_call=True)

@@ -4,9 +4,7 @@ SEC EDGAR Public-Domain Corporate Actions and Fundamentals Adapter.
 
 from __future__ import annotations
 
-from typing import Optional, Dict, Any
-import requests
-import pandas as pd
+from typing import Any, Dict, Optional
 
 from kuwala.config import get_config
 from kuwala.data.adapters.base import BaseAdapter

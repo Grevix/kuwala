@@ -5,9 +5,9 @@ Surface Principal Component Analysis (PCA) & Residual Monitoring.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Any, Tuple, Union, Sequence, List
+from typing import Any, List, Sequence, Union
+
 import numpy as np
-import pandas as pd
 
 
 @dataclass
@@ -63,7 +63,7 @@ def surface_pca(
 
     # SVD
     u, s, vt = np.linalg.svd(centered, full_matrices=False)
-    explained_variance = (s ** 2) / (n_samples - 1)
+    explained_variance = (s**2) / (n_samples - 1)
     total_var = np.sum(explained_variance)
     if total_var > 0:
         explained_ratio = explained_variance[:n_components] / total_var

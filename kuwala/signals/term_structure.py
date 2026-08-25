@@ -4,7 +4,6 @@ Term Structure Relative-Value Analytics.
 
 from __future__ import annotations
 
-from typing import List, Dict, Any
 import numpy as np
 import pandas as pd
 
@@ -20,12 +19,14 @@ def term_structure_metrics(surface: VolatilitySurface) -> pd.DataFrame:
 
     for i, t in enumerate(surface.expiries):
         atm_iv = surface.implied_volatility(spot, t)
-        total_var = (atm_iv ** 2) * t
-        records.append({
-            "tenor_years": t,
-            "atm_iv": atm_iv,
-            "total_variance": total_var,
-        })
+        total_var = (atm_iv**2) * t
+        records.append(
+            {
+                "tenor_years": t,
+                "atm_iv": atm_iv,
+                "total_variance": total_var,
+            }
+        )
 
     df = pd.DataFrame(records)
     if len(df) > 1:

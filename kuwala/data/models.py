@@ -4,15 +4,15 @@ Canonical Data Models for Options, Quotes, Chains, and Volatility.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Optional, Dict, Any, Union
+from typing import Any, Dict, List, Optional
+
 import pandas as pd
 import pyarrow as pa
 
-from kuwala.data.conventions import to_utc_datetime, year_fraction
+from kuwala.data.conventions import year_fraction
 
 
 class OptionType(str, Enum):
@@ -76,11 +76,28 @@ class OptionChain:
 
     def to_dataframe(self) -> pd.DataFrame:
         if not self.quotes:
-            return pd.DataFrame(columns=[
-                "underlying", "expiry", "strike", "option_type", "bid", "ask", "mid",
-                "last", "volume", "open_interest", "implied_volatility", "timestamp",
-                "spot", "rate", "dividend_yield", "ttm", "moneyness", "log_moneyness"
-            ])
+            return pd.DataFrame(
+                columns=[
+                    "underlying",
+                    "expiry",
+                    "strike",
+                    "option_type",
+                    "bid",
+                    "ask",
+                    "mid",
+                    "last",
+                    "volume",
+                    "open_interest",
+                    "implied_volatility",
+                    "timestamp",
+                    "spot",
+                    "rate",
+                    "dividend_yield",
+                    "ttm",
+                    "moneyness",
+                    "log_moneyness",
+                ]
+            )
         records = [q.to_dict() for q in self.quotes]
         df = pd.DataFrame.from_records(records)
         df["spot"] = self.spot
@@ -88,9 +105,7 @@ class OptionChain:
         df["dividend_yield"] = self.dividend_yield
         df["expiry"] = pd.to_datetime(df["expiry"], utc=True)
         df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
-        df["ttm"] = df.apply(
-            lambda row: year_fraction(row["timestamp"], row["expiry"]), axis=1
-        )
+        df["ttm"] = df.apply(lambda row: year_fraction(row["timestamp"], row["expiry"]), axis=1)
         df["moneyness"] = df["strike"] / self.spot
         df["log_moneyness"] = df.apply(
             lambda r: math_log_moneyness(self.spot, r["strike"], r["ttm"], self.rate, self.dividend_yield),
@@ -105,6 +120,7 @@ class OptionChain:
 
 def math_log_moneyness(spot: float, strike: float, ttm: float, rate: float, div: float) -> float:
     import numpy as np
+
     forward = spot * np.exp((rate - div) * ttm)
     return float(np.log(strike / forward)) if forward > 0 and strike > 0 else 0.0
 

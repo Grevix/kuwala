@@ -7,7 +7,6 @@ SMA, EMA, RSI, MACD, Bollinger Bands, ATR, Stochastics, VWAP.
 
 from __future__ import annotations
 
-from typing import Dict, Any, Tuple
 import numpy as np
 import pandas as pd
 
@@ -54,11 +53,14 @@ def macd(
     signal_line = ema(macd_line, span=signal_period)
     hist = macd_line - signal_line
 
-    return pd.DataFrame({
-        "macd": macd_line,
-        "macd_signal": signal_line,
-        "macd_hist": hist,
-    }, index=series.index)
+    return pd.DataFrame(
+        {
+            "macd": macd_line,
+            "macd_signal": signal_line,
+            "macd_hist": hist,
+        },
+        index=series.index,
+    )
 
 
 def bollinger_bands(
@@ -76,13 +78,16 @@ def bollinger_bands(
     bandwidth = (upper - lower) / (middle + 1e-10)
     percent_b = (series - lower) / (upper - lower + 1e-10)
 
-    return pd.DataFrame({
-        "bb_middle": middle,
-        "bb_upper": upper,
-        "bb_lower": lower,
-        "bb_bandwidth": bandwidth,
-        "bb_percent_b": percent_b,
-    }, index=series.index)
+    return pd.DataFrame(
+        {
+            "bb_middle": middle,
+            "bb_upper": upper,
+            "bb_lower": lower,
+            "bb_bandwidth": bandwidth,
+            "bb_percent_b": percent_b,
+        },
+        index=series.index,
+    )
 
 
 def atr(
@@ -118,7 +123,10 @@ def stochastic_oscillator(
     k_line = 100.0 * (close - lowest_low) / (highest_high - lowest_low + 1e-10)
     d_line = k_line.rolling(window=d_window).mean()
 
-    return pd.DataFrame({
-        "stoch_k": k_line,
-        "stoch_d": d_line,
-    }, index=close.index)
+    return pd.DataFrame(
+        {
+            "stoch_k": k_line,
+            "stoch_d": d_line,
+        },
+        index=close.index,
+    )

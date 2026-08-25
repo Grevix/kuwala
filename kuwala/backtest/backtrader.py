@@ -5,6 +5,7 @@ Backtrader Custom Data Feed and Signal Bridge.
 from __future__ import annotations
 
 from typing import Union
+
 import pandas as pd
 import pyarrow as pa
 

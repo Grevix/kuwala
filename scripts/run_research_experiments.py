@@ -5,20 +5,16 @@ Executes quantitative research experiments on real S&P 500 & Nasdaq-100 datasets
 using strict temporal train/validation/test splits and zero lookahead leakage.
 """
 
-import time
 import json
-import psutil
-import os
+import time
 from pathlib import Path
-import pandas as pd
-import numpy as np
-from sklearn.linear_model import Ridge
-from sklearn.metrics import mean_squared_error, mean_absolute_error
 
-import kuwala
-from kuwala.signals.realized_vol import realized_volatility, RealizedVolEstimator
-from kuwala.signals.validation import purged_kfold_split, validate_signal
-from kuwala.data.store import get_store
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+from kuwala.signals.realized_vol import RealizedVolEstimator, realized_volatility
 
 DATA_DIR = Path("research/data")
 experiment_results = []
@@ -35,7 +31,7 @@ def run_experiment_1_vol_forecasting():
     df_raw = pd.read_csv(f)
     sym_col = next((c for c in df_raw.columns if "symbol" in c.lower() or "ticker" in c.lower()), None)
     date_col = next((c for c in df_raw.columns if "date" in c.lower()), None)
-    
+
     df_spy = df_raw[df_raw[sym_col] == "SPY"].copy()
     if df_spy.empty:
         df_spy = df_raw[df_raw[sym_col] == df_raw[sym_col].iloc[0]].copy()
@@ -48,13 +44,15 @@ def run_experiment_1_vol_forecasting():
     rv_gk = realized_volatility(df_spy, window=20, estimator=RealizedVolEstimator.GARMAN_KLASS)
     rv_c2c = realized_volatility(df_spy, window=20, estimator=RealizedVolEstimator.CLOSE_TO_CLOSE)
 
-    df_model = pd.DataFrame({
-        "rv_target": rv_gk.shift(-5), # 5-day forward realized vol target
-        "rv_lag0": rv_gk,
-        "rv_lag5": rv_gk.shift(5),
-        "rv_lag10": rv_gk.shift(10),
-        "rv_c2c_lag0": rv_c2c,
-    }).dropna()
+    df_model = pd.DataFrame(
+        {
+            "rv_target": rv_gk.shift(-5),  # 5-day forward realized vol target
+            "rv_lag0": rv_gk,
+            "rv_lag5": rv_gk.shift(5),
+            "rv_lag10": rv_gk.shift(10),
+            "rv_c2c_lag0": rv_c2c,
+        }
+    ).dropna()
 
     train_mask = df_model.index < "2019-01-01"
     test_mask = df_model.index >= "2019-01-01"
@@ -83,30 +81,34 @@ def run_experiment_1_vol_forecasting():
     print(f"  [Train Rows: {len(train_df):,} | Test Rows: {len(test_df):,}]")
     print(f"  Baseline Naive Persistence RMSE: {baseline_rmse:.4f}, MAE: {baseline_mae:.4f}")
     print(f"  Kuwala Ridge AR Vol Model RMSE:   {model_rmse:.4f}, MAE: {model_mae:.4f}")
-    print(f"  Out-of-Sample RMSE Improvement:  {(baseline_rmse - model_rmse)/baseline_rmse*100:+.2f}%")
+    print(f"  Out-of-Sample RMSE Improvement:  {(baseline_rmse - model_rmse) / baseline_rmse * 100:+.2f}%")
 
-    leakage_audit_log.append({
-        "experiment": "Exp 1: Realized Vol Forecasting",
-        "train_range": f"{train_df.index.min().strftime('%Y-%m-%d')} to {train_df.index.max().strftime('%Y-%m-%d')}",
-        "test_range": f"{test_df.index.min().strftime('%Y-%m-%d')} to {test_df.index.max().strftime('%Y-%m-%d')}",
-        "temporal_overlap": False,
-        "embargo_applied": True,
-        "leakage_detected": False,
-    })
+    leakage_audit_log.append(
+        {
+            "experiment": "Exp 1: Realized Vol Forecasting",
+            "train_range": f"{train_df.index.min().strftime('%Y-%m-%d')} to {train_df.index.max().strftime('%Y-%m-%d')}",
+            "test_range": f"{test_df.index.min().strftime('%Y-%m-%d')} to {test_df.index.max().strftime('%Y-%m-%d')}",
+            "temporal_overlap": False,
+            "embargo_applied": True,
+            "leakage_detected": False,
+        }
+    )
 
-    experiment_results.append({
-        "experiment_id": "EXP-01",
-        "title": "Realized Volatility Forecasting on S&P 500",
-        "dataset": "s_and_p500_jacksaleeby",
-        "train_period": "2000 to 2018",
-        "test_period": "2019 to 2026",
-        "baseline_rmse": baseline_rmse,
-        "model_rmse": model_rmse,
-        "baseline_mae": baseline_mae,
-        "model_mae": model_mae,
-        "rmse_improvement_pct": round((baseline_rmse - model_rmse)/baseline_rmse*100, 2),
-        "status": "PASSED (Beats Naive Baseline Out-of-Sample)",
-    })
+    experiment_results.append(
+        {
+            "experiment_id": "EXP-01",
+            "title": "Realized Volatility Forecasting on S&P 500",
+            "dataset": "s_and_p500_jacksaleeby",
+            "train_period": "2000 to 2018",
+            "test_period": "2019 to 2026",
+            "baseline_rmse": baseline_rmse,
+            "model_rmse": model_rmse,
+            "baseline_mae": baseline_mae,
+            "model_mae": model_mae,
+            "rmse_improvement_pct": round((baseline_rmse - model_rmse) / baseline_rmse * 100, 2),
+            "status": "PASSED (Beats Naive Baseline Out-of-Sample)",
+        }
+    )
 
 
 def run_experiment_2_intraday_rv():
@@ -140,25 +142,33 @@ def run_experiment_2_intraday_rv():
 
     min_rs = float(rv_rs.dropna().min())
     min_gk = float(rv_gk.dropna().min())
-    print(f"  Processed {len(df_raw):,} intraday bars in {elapsed*1000:.1f}ms ({len(df_raw)/elapsed:,.0f} bars/sec)")
-    print(f"  Strict Positivity Check: RS min={min_rs:.4f}, GK min={min_gk:.4f} -> {'PASSED' if min_rs >= 0 and min_gk >= 0 else 'FAILED'}")
+    print(
+        f"  Processed {len(df_raw):,} intraday bars in {elapsed * 1000:.1f}ms ({len(df_raw) / elapsed:,.0f} bars/sec)"
+    )
+    print(
+        f"  Strict Positivity Check: RS min={min_rs:.4f}, GK min={min_gk:.4f} -> {'PASSED' if min_rs >= 0 and min_gk >= 0 else 'FAILED'}"
+    )
 
-    leakage_audit_log.append({
-        "experiment": "Exp 2: Intraday Realized Vol Benchmark",
-        "sample_size": len(df_raw),
-        "leakage_detected": False,
-        "notes": "Rolling window uses past observations only (t-W .. t)",
-    })
+    leakage_audit_log.append(
+        {
+            "experiment": "Exp 2: Intraday Realized Vol Benchmark",
+            "sample_size": len(df_raw),
+            "leakage_detected": False,
+            "notes": "Rolling window uses past observations only (t-W .. t)",
+        }
+    )
 
-    experiment_results.append({
-        "experiment_id": "EXP-02",
-        "title": "High-Frequency Realized Volatility Estimator Stress",
-        "dataset": "nasdaq100_novandra_15m",
-        "rows_processed": len(df_raw),
-        "throughput_bars_per_sec": int(len(df_raw) / elapsed),
-        "positivity_passed": bool(min_rs >= 0 and min_gk >= 0),
-        "status": "PASSED (Zero numerical degradation)",
-    })
+    experiment_results.append(
+        {
+            "experiment_id": "EXP-02",
+            "title": "High-Frequency Realized Volatility Estimator Stress",
+            "dataset": "nasdaq100_novandra_15m",
+            "rows_processed": len(df_raw),
+            "throughput_bars_per_sec": int(len(df_raw) / elapsed),
+            "positivity_passed": bool(min_rs >= 0 and min_gk >= 0),
+            "status": "PASSED (Zero numerical degradation)",
+        }
+    )
 
 
 def save_reports():

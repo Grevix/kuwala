@@ -5,7 +5,8 @@ Black-Scholes (1973) European Option Analytical Pricing.
 from __future__ import annotations
 
 import math
-from typing import Union, Sequence
+from typing import Sequence, Union
+
 import numpy as np
 from scipy.stats import norm
 

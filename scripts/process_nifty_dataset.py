@@ -7,27 +7,33 @@ Processes real 1-minute OHLCV data across NIFTY-100 equities:
 - Tests out-of-core Arrow -> Parquet -> DuckDB pipeline.
 """
 
-import time
 import json
 import shutil
 from pathlib import Path
+
 import pandas as pd
-import numpy as np
 
-import kuwala
-from kuwala.signals.indicators import (
-    sma, ema, rsi, macd, bollinger_bands, atr, stochastic_oscillator
-)
-from kuwala.signals.realized_vol import realized_volatility, RealizedVolEstimator
 from kuwala.data.store import get_store
+from kuwala.signals.indicators import atr, bollinger_bands, ema, rsi, sma
+from kuwala.signals.realized_vol import RealizedVolEstimator, realized_volatility
 
-KAGGLE_PATH = Path(r"C:\Users\Aaryan Rawat\.cache\kagglehub\datasets\debashis74017\algo-trading-data-nifty-100-data-with-indicators\versions\17")
+KAGGLE_PATH = Path(
+    r"C:\Users\Aaryan Rawat\.cache\kagglehub\datasets\debashis74017\algo-trading-data-nifty-100-data-with-indicators\versions\17"
+)
 DEST_DIR = Path("research/data/nifty")
 DEST_DIR.mkdir(parents=True, exist_ok=True)
 
 TARGET_TICKERS = [
-    "RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK",
-    "ADANIENT", "TATAMOTORS", "SBIN", "BHARTIARTL", "ITC"
+    "RELIANCE",
+    "TCS",
+    "INFY",
+    "HDFCBANK",
+    "ICICIBANK",
+    "ADANIENT",
+    "TATAMOTORS",
+    "SBIN",
+    "BHARTIARTL",
+    "ITC",
 ]
 
 nifty_manifest = []
@@ -75,18 +81,20 @@ def process_nifty():
         missing_count = int(df.isna().sum().sum())
         neg_prices = int((df[["open", "high", "low", "close"]] <= 0).sum().sum())
 
-        print(f"[{ticker}] {row_count:,} rows ({min_date} to {max_date}) | Size: {file_size_mb:.2f} MB | Duplicates: {dup_timestamps} | Missing: {missing_count}")
+        print(
+            f"[{ticker}] {row_count:,} rows ({min_date} to {max_date}) | Size: {file_size_mb:.2f} MB | Duplicates: {dup_timestamps} | Missing: {missing_count}"
+        )
 
         # Compute Technical Indicators on 1-minute close
-        c = df["close"]
-        h = df["high"]
-        l = df["low"]
+        close_s = df["close"]
+        high_s = df["high"]
+        low_s = df["low"]
 
-        s_sma = sma(c, 20)
-        s_ema = ema(c, 20)
-        s_rsi = rsi(c, 14)
-        df_bb = bollinger_bands(c, 20)
-        s_atr = atr(h, l, c, 14)
+        s_sma = sma(close_s, 20)
+        s_ema = ema(close_s, 20)
+        s_rsi = rsi(close_s, 14)
+        df_bb = bollinger_bands(close_s, 20)
+        s_atr = atr(high_s, low_s, close_s, 14)
 
         # Compute Realized Volatility on 1-minute bars
         rv_gk = realized_volatility(df, window=30, estimator=RealizedVolEstimator.GARMAN_KLASS)
@@ -98,20 +106,22 @@ def process_nifty():
         atr_valid = (s_atr.dropna() >= 0).all()
         rv_valid = (rv_gk.dropna() >= 0).all() and (rv_rs.dropna() >= 0).all()
 
-        nifty_manifest.append({
-            "ticker": ticker,
-            "file": src_file.name,
-            "rows": row_count,
-            "size_mb": round(file_size_mb, 2),
-            "start_date": min_date,
-            "end_date": max_date,
-            "duplicates": dup_timestamps,
-            "missing": missing_count,
-            "rsi_invariant_passed": bool(rsi_valid),
-            "bb_invariant_passed": bool(bb_valid),
-            "atr_invariant_passed": bool(atr_valid),
-            "realized_vol_invariant_passed": bool(rv_valid),
-        })
+        nifty_manifest.append(
+            {
+                "ticker": ticker,
+                "file": src_file.name,
+                "rows": row_count,
+                "size_mb": round(file_size_mb, 2),
+                "start_date": min_date,
+                "end_date": max_date,
+                "duplicates": dup_timestamps,
+                "missing": missing_count,
+                "rsi_invariant_passed": bool(rsi_valid),
+                "bb_invariant_passed": bool(bb_valid),
+                "atr_invariant_passed": bool(atr_valid),
+                "realized_vol_invariant_passed": bool(rv_valid),
+            }
+        )
 
     print("-" * 80)
     print(f"Total NIFTY-100 Stocks Processed: {total_files}")

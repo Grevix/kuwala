@@ -6,24 +6,25 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple, Optional, Union
+from typing import Dict, List, Optional, Union
+
 import numpy as np
-from scipy.optimize import minimize, differential_evolution
+from scipy.optimize import differential_evolution, minimize
 
 from kuwala._core import get_rust_core, has_rust_core
 
 
 @dataclass
 class SsviParameters:
-    rho: float       # Correlation skew parameter in (-1, 1)
-    eta: float       # Scale parameter > 0
-    gamma: float     # Power-law parameter in (0, 1]
-    theta_map: Dict[float, float] = field(default_factory=dict) # ATM total variance per expiry T
+    rho: float  # Correlation skew parameter in (-1, 1)
+    eta: float  # Scale parameter > 0
+    gamma: float  # Power-law parameter in (0, 1]
+    theta_map: Dict[float, float] = field(default_factory=dict)  # ATM total variance per expiry T
 
     def phi(self, theta: float) -> float:
         if theta <= 1e-8:
             return self.eta
-        return self.eta / (theta ** self.gamma)
+        return self.eta / (theta**self.gamma)
 
     def total_variance(self, k: Union[float, np.ndarray], theta: float) -> Union[float, np.ndarray]:
         """
@@ -34,17 +35,17 @@ class SsviParameters:
                 return get_rust_core().py_ssvi_total_variance(float(k), float(theta), self.rho, self.eta, self.gamma)
             phi = self.phi(theta)
             phi_k = phi * k
-            rad = math.sqrt(max(0.0, (phi_k + self.rho)**2 + (1.0 - self.rho**2)))
+            rad = math.sqrt(max(0.0, (phi_k + self.rho) ** 2 + (1.0 - self.rho**2)))
             return 0.5 * theta * (1.0 + self.rho * phi_k + rad)
 
         k_arr = np.asarray(k, dtype=np.float64)
         phi = self.phi(theta)
         phi_k = phi * k_arr
-        rad = np.sqrt(np.maximum(0.0, (phi_k + self.rho)**2 + (1.0 - self.rho**2)))
+        rad = np.sqrt(np.maximum(0.0, (phi_k + self.rho) ** 2 + (1.0 - self.rho**2)))
         return 0.5 * theta * (1.0 + self.rho * phi_k + rad)
 
     def implied_volatility(self, k: Union[float, np.ndarray], t: float) -> Union[float, np.ndarray]:
-        theta = self.theta_map.get(t, t * 0.04) # fallback
+        theta = self.theta_map.get(t, t * 0.04)  # fallback
         total_var = self.total_variance(k, theta)
         return np.sqrt(np.maximum(1e-8, total_var / max(1e-5, t)))
 
@@ -52,7 +53,7 @@ class SsviParameters:
 @dataclass
 class CalibrationConfig:
     optimizer: str = "multi_start"  # "multi_start", "differential_evolution", "lbfgsb"
-    weighting: str = "vega"         # "vega", "equal", "inverse_spread"
+    weighting: str = "vega"  # "vega", "equal", "inverse_spread"
     tol: float = 1e-8
     max_iter: int = 2000
     n_starts: int = 10
@@ -92,24 +93,24 @@ def calibrate_ssvi(
         total_err = 0.0
         for t in sorted_expiries:
             theta = theta_map[t]
-            phi_val = eta / (theta ** gamma) if theta > 1e-8 else eta
+            phi_val = eta / (theta**gamma) if theta > 1e-8 else eta
             if theta * phi_val * (1.0 + abs(rho)) > 4.0:
                 total_err += 1e5 * (theta * phi_val * (1.0 + abs(rho)) - 4.0) ** 2
 
             ks = log_moneyness_dict[t]
             market_w = (market_iv_dict[t] ** 2) * t
-            
+
             phi_k = phi_val * ks
-            rad = np.sqrt(np.maximum(0.0, (phi_k + rho)**2 + (1.0 - rho**2)))
+            rad = np.sqrt(np.maximum(0.0, (phi_k + rho) ** 2 + (1.0 - rho**2)))
             model_w = 0.5 * theta * (1.0 + rho * phi_k + rad)
 
             diff = model_w - market_w
             if cfg.weighting == "vega":
-                weights = np.exp(-0.5 * (ks / 0.2)**2)
+                weights = np.exp(-0.5 * (ks / 0.2) ** 2)
             else:
                 weights = np.ones_like(ks)
 
-            total_err += np.sum(weights * (diff ** 2))
+            total_err += np.sum(weights * (diff**2))
 
         return total_err
 

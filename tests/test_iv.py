@@ -1,6 +1,8 @@
-import pytest
 import numpy as np
+import pytest
+
 import kuwala
+
 
 def test_implied_volatility_recovery():
     spot = 100.0
@@ -15,6 +17,7 @@ def test_implied_volatility_recovery():
 
     assert pytest.approx(recovered_iv, abs=1e-5) == true_sigma
 
+
 def test_implied_volatility_put_recovery():
     spot = 50.0
     strike = 48.0
@@ -28,6 +31,7 @@ def test_implied_volatility_put_recovery():
 
     assert pytest.approx(recovered_iv, abs=1e-5) == true_sigma
 
+
 def test_implied_volatility_batch():
     spots = np.array([100.0, 100.0, 100.0])
     strikes = np.array([95.0, 100.0, 105.0])
@@ -36,6 +40,7 @@ def test_implied_volatility_batch():
 
     recovered = kuwala.implied_volatility(prices, spots, strikes, 1.0, 0.04, 0.0, is_call=True)
     np.testing.assert_allclose(recovered, vols, rtol=1e-4)
+
 
 def test_implied_volatility_arbitrage_bound_rejection():
     # Price below intrinsic value should return NaN or error

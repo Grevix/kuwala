@@ -6,33 +6,26 @@ FRED live yields, Nasdaq Data Link, and Yahoo live options).
 Zero synthetic data used for the primary test cases.
 """
 
-import time
 import json
-import psutil
 import os
-import sys
+import time
 from pathlib import Path
-import pandas as pd
-import numpy as np
 
-import kuwala
-from kuwala.pricing.black_scholes import black_scholes
-from kuwala.pricing.greeks import greeks
-from kuwala.volatility.iv import implied_volatility, extract_chain_iv
-from kuwala.volatility.ssvi import CalibrationConfig
-from kuwala.volatility.surface import SsviSurface
-from kuwala.volatility.local_vol import extract_dupire_local_volatility
-from kuwala.diagnostics.arbitrage import diagnose_surface
-from kuwala.signals.realized_vol import realized_volatility, RealizedVolEstimator
-from kuwala.signals.vrp import vrp
-from kuwala.signals.indicators import (
-    sma, ema, rsi, macd, bollinger_bands, atr, stochastic_oscillator
-)
-from kuwala.signals.validation import purged_kfold_split, validate_signal
+import numpy as np
+import pandas as pd
+import psutil
+
 from kuwala.backtest.vectorbt import to_vectorbt
-from kuwala.data.store import get_store
-from kuwala.data.adapters import YahooAdapter, FredAdapter
+from kuwala.data.adapters import FredAdapter, YahooAdapter
 from kuwala.data.pipeline import clean_chain
+from kuwala.data.store import get_store
+from kuwala.pricing.black_scholes import black_scholes
+from kuwala.signals.indicators import atr, bollinger_bands, ema, macd, rsi, sma, stochastic_oscillator
+from kuwala.signals.realized_vol import RealizedVolEstimator, realized_volatility
+from kuwala.signals.validation import validate_signal
+from kuwala.signals.vrp import vrp
+from kuwala.volatility.iv import extract_chain_iv, implied_volatility
+from kuwala.volatility.surface import SsviSurface
 
 DATA_DIR = Path("research/data")
 
@@ -118,10 +111,10 @@ def run_10k_real_validation():
         rv_c2c = realized_volatility(df_intra, window=20, estimator=RealizedVolEstimator.CLOSE_TO_CLOSE)
 
         valid_rv = (
-            (rv_gk.dropna() >= 0.0).all() and
-            (rv_pk.dropna() >= 0.0).all() and
-            (rv_rs.dropna() >= 0.0).all() and
-            (rv_c2c.dropna() >= 0.0).all()
+            (rv_gk.dropna() >= 0.0).all()
+            and (rv_pk.dropna() >= 0.0).all()
+            and (rv_rs.dropna() >= 0.0).all()
+            and (rv_c2c.dropna() >= 0.0).all()
         )
         n_rv = len(df_intra)
         if valid_rv:
@@ -155,24 +148,26 @@ def run_10k_real_validation():
     yahoo = YahooAdapter()
     tickers = ["SPY", "QQQ", "AAPL", "MSFT", "NVDA"]
     all_real_quotes = []
-    
+
     for sym in tickers:
         try:
             chain = yahoo.fetch(sym, fetch_all_expiries=False)
             cleaned = clean_chain(chain)
             obs = extract_chain_iv(cleaned)
             for o in obs:
-                all_real_quotes.append({
-                    "underlying": sym,
-                    "spot": cleaned.spot,
-                    "strike": o.strike,
-                    "ttm": o.ttm,
-                    "price": o.market_price,
-                    "iv": o.implied_volatility,
-                    "is_call": o.option_type.value == "call",
-                    "rate": cleaned.rate,
-                    "q": cleaned.dividend_yield,
-                })
+                all_real_quotes.append(
+                    {
+                        "underlying": sym,
+                        "spot": cleaned.spot,
+                        "strike": o.strike,
+                        "ttm": o.ttm,
+                        "price": o.market_price,
+                        "iv": o.implied_volatility,
+                        "is_call": o.option_type.value == "call",
+                        "rate": cleaned.rate,
+                        "q": cleaned.dividend_yield,
+                    }
+                )
         except Exception as e:
             print(f"      [WARN] Yahoo fetch {sym}: {e}", flush=True)
 
@@ -204,7 +199,7 @@ def run_10k_real_validation():
 
     price_diff = np.abs(reconstructed_prices - df_opt["price"].values)
     valid_reconstruction = (price_diff < 1e-3) | np.isnan(solved_ivs)
-    
+
     passed_cases += int(np.sum(valid_reconstruction))
     failed_cases += int(np.sum(~valid_reconstruction))
     real_cases_count += n_opts
@@ -216,7 +211,7 @@ def run_10k_real_validation():
     print("\n[6/8] Executing 500+ Real SSVI Surface Calibrations & Grid Points...", flush=True)
     n_surfs_cases = 500
     surf_eval_passed = 0
-    
+
     for sym in tickers[:5]:
         chain = clean_chain(yahoo.fetch(sym))
         surf = SsviSurface.calibrate(chain)
@@ -226,7 +221,7 @@ def run_10k_real_validation():
             surf_eval_passed += 100
 
     passed_cases += surf_eval_passed
-    failed_cases += (n_surfs_cases - surf_eval_passed)
+    failed_cases += n_surfs_cases - surf_eval_passed
     real_cases_count += n_surfs_cases
     print(f"      -> {n_surfs_cases:,} Real SSVI Surface Calibration & Smile Points Verified.", flush=True)
 
@@ -246,7 +241,7 @@ def run_10k_real_validation():
             arb_passed += 100
 
     passed_cases += arb_passed
-    failed_cases += (n_arb_cases - arb_passed)
+    failed_cases += n_arb_cases - arb_passed
     real_cases_count += n_arb_cases
     print(f"      -> {n_arb_cases:,} Real Arbitrage & Dupire Invariant Cases Evaluated.", flush=True)
 
@@ -271,7 +266,7 @@ def run_10k_real_validation():
             sig_passed += 100
 
     passed_cases += sig_passed
-    failed_cases += (n_sig_cases - sig_passed)
+    failed_cases += n_sig_cases - sig_passed
     real_cases_count += n_sig_cases
     print(f"      -> {n_sig_cases:,} Real Signal & Purged Validation Cases Verified.", flush=True)
 
@@ -285,7 +280,9 @@ def run_10k_real_validation():
     print("  10,000+ REAL-WORLD VALIDATION SUMMARY", flush=True)
     print("=" * 80, flush=True)
     print(f"Total Real-World Cases Executed: {real_cases_count:,}", flush=True)
-    print(f"Passed:                          {passed_cases:,} ({passed_cases/real_cases_count*100:.2f}%)", flush=True)
+    print(
+        f"Passed:                          {passed_cases:,} ({passed_cases / real_cases_count * 100:.2f}%)", flush=True
+    )
     print(f"Failed:                          {failed_cases:,}", flush=True)
     print(f"Total Runtime:                   {elapsed_total:.2f} seconds", flush=True)
     print(f"Throughput:                      {real_cases_count / elapsed_total:,.0f} cases/sec", flush=True)
@@ -368,7 +365,7 @@ def run_10k_real_validation():
             "missing_count": 0,
             "duplicate_count": 0,
             "status": "VALIDATED",
-        }
+        },
     ]
 
     with open("research/real_data_manifest.json", "w") as f:
@@ -417,7 +414,7 @@ def run_10k_real_validation():
         f"| **Real SSVI Surface Calibrations** | 500+ | **{500:,}** | {500:,} | `PASS` |",
         f"| **Real Arbitrage Diagnostics & Dupire** | 500+ | **{500:,}** | {500:,} | `PASS` |",
         f"| **Real VRP Signals & Purged Cross-Validation** | 500+ | **{500:,}** | {500:,} | `PASS` |",
-        f"| **TOTAL REAL-WORLD CASES** | **10,000+** | **{real_cases_count:,}** | **{passed_cases:,} ({passed_cases/real_cases_count*100:.2f}%)** | **STAGE 1 — PASSED** |",
+        f"| **TOTAL REAL-WORLD CASES** | **10,000+** | **{real_cases_count:,}** | **{passed_cases:,} ({passed_cases / real_cases_count * 100:.2f}%)** | **STAGE 1 — PASSED** |",
         "",
         "## 3. Performance & Memory Profile",
         "",

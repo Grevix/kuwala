@@ -9,13 +9,13 @@ Intended strictly for personal research and educational use under Yahoo's Terms 
 from __future__ import annotations
 
 import datetime
-from typing import List, Optional, Tuple, Dict, Any
-import requests
-import pandas as pd
+from typing import Any, Dict, List, Optional
+
 import numpy as np
+import pandas as pd
+import requests
 
 from kuwala.data.adapters.base import BaseAdapter
-from kuwala.data.conventions import to_utc_datetime
 from kuwala.data.models import OptionChain, OptionQuote, OptionType
 
 
@@ -71,7 +71,7 @@ class YahooAdapter(BaseAdapter):
 
                 # If requested, fetch additional expiries
                 if fetch_all_expiries and len(expiration_timestamps) > 1:
-                    for ts in expiration_timestamps[1:4]: # fetch next 3 tenors
+                    for ts in expiration_timestamps[1:4]:  # fetch next 3 tenors
                         try:
                             sub_resp = requests.get(base_url, params={"date": ts}, headers=headers, timeout=5)
                             if sub_resp.status_code == 200:
@@ -119,14 +119,20 @@ class YahooAdapter(BaseAdapter):
                 timestamps = res.get("timestamp", [])
                 indicators = res.get("indicators", {}).get("quote", [{}])[0]
 
-                df = pd.DataFrame({
-                    "timestamp": pd.to_datetime(timestamps, unit="s", utc=True),
-                    "open": indicators.get("open", []),
-                    "high": indicators.get("high", []),
-                    "low": indicators.get("low", []),
-                    "close": indicators.get("close", []),
-                    "volume": indicators.get("volume", []),
-                }).dropna().set_index("timestamp")
+                df = (
+                    pd.DataFrame(
+                        {
+                            "timestamp": pd.to_datetime(timestamps, unit="s", utc=True),
+                            "open": indicators.get("open", []),
+                            "high": indicators.get("high", []),
+                            "low": indicators.get("low", []),
+                            "close": indicators.get("close", []),
+                            "volume": indicators.get("volume", []),
+                        }
+                    )
+                    .dropna()
+                    .set_index("timestamp")
+                )
                 if not df.empty:
                     return df
         except Exception:
@@ -137,13 +143,16 @@ class YahooAdapter(BaseAdapter):
         np.random.seed(42)
         rets = np.random.normal(0.0004, 0.012, size=len(dates))
         close_p = 500.0 * np.exp(np.cumsum(rets))
-        return pd.DataFrame({
-            "open": close_p * 1.001,
-            "high": close_p * 1.008,
-            "low": close_p * 0.992,
-            "close": close_p,
-            "volume": 50_000_000,
-        }, index=dates)
+        return pd.DataFrame(
+            {
+                "open": close_p * 1.001,
+                "high": close_p * 1.008,
+                "low": close_p * 0.992,
+                "close": close_p,
+                "volume": 50_000_000,
+            },
+            index=dates,
+        )
 
     def _parse_option_block(
         self,
@@ -205,6 +214,7 @@ def _generate_synthetic_reference_chain(symbol: str) -> tuple[List[OptionQuote],
     Generate synthetic reference option quotes for offline resilience.
     """
     from kuwala.pricing.black_scholes import black_scholes
+
     spot = 500.0 if symbol.upper() == "SPY" else 100.0
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     quotes = []

@@ -4,12 +4,13 @@ Volatility Risk Premium (VRP) Signal Generator.
 
 from __future__ import annotations
 
-from typing import Union, Optional
+from typing import Optional, Union
+
 import numpy as np
 import pandas as pd
 
+from kuwala.signals.realized_vol import RealizedVolEstimator, realized_volatility
 from kuwala.volatility.surface import VolatilitySurface
-from kuwala.signals.realized_vol import realized_volatility, RealizedVolEstimator
 
 
 def vrp(
@@ -57,28 +58,35 @@ def vrp(
         low_p = close_p * (1.0 - np.abs(np.random.normal(0, 0.005, size=len(dates))))
         open_p = close_p * (1.0 + np.random.normal(0, 0.002, size=len(dates)))
 
-        prices = pd.DataFrame({
-            "open": open_p,
-            "high": high_p,
-            "low": low_p,
-            "close": close_p,
-        }, index=dates)
+        prices = pd.DataFrame(
+            {
+                "open": open_p,
+                "high": high_p,
+                "low": low_p,
+                "close": close_p,
+            },
+            index=dates,
+        )
 
     rv_series = realized_volatility(prices, window=realized_window, estimator=estimator)
     latest_rv = float(rv_series.dropna().iloc[-1]) if not rv_series.dropna().empty else 0.18
 
     vrp_spread = atm_iv - latest_rv
 
-    res = pd.DataFrame([{
-        "underlying": surface.underlying,
-        "spot": surface.spot,
-        "tenor_ttm": expiry_ttm,
-        "implied_vol": atm_iv,
-        "realized_vol": latest_rv,
-        "vrp": vrp_spread,
-        "vrp_spread": vrp_spread,
-        "vrp_ratio": atm_iv / latest_rv if latest_rv > 0 else np.nan,
-        "estimator": str(estimator),
-        "window": realized_window,
-    }])
+    res = pd.DataFrame(
+        [
+            {
+                "underlying": surface.underlying,
+                "spot": surface.spot,
+                "tenor_ttm": expiry_ttm,
+                "implied_vol": atm_iv,
+                "realized_vol": latest_rv,
+                "vrp": vrp_spread,
+                "vrp_spread": vrp_spread,
+                "vrp_ratio": atm_iv / latest_rv if latest_rv > 0 else np.nan,
+                "estimator": str(estimator),
+                "window": realized_window,
+            }
+        ]
+    )
     return res

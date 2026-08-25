@@ -4,9 +4,10 @@ Nasdaq Data Link (formerly Quandl) Adapter with per-dataset licensing inspection
 
 from __future__ import annotations
 
-from typing import Optional, Dict, Any
-import requests
+from typing import Optional
+
 import pandas as pd
+import requests
 
 from kuwala.config import get_config
 from kuwala.data.adapters.base import BaseAdapter
@@ -56,10 +57,12 @@ class NasdaqDataLinkAdapter(BaseAdapter):
 
         # Synthetic fallback
         dates = pd.date_range(end=pd.Timestamp.now(tz="UTC"), periods=10, freq="D")
-        return pd.DataFrame({
-            "Date": dates,
-            "1 MO": 0.045,
-            "3 MO": 0.046,
-            "1 YR": 0.042,
-            "10 YR": 0.039,
-        })
+        return pd.DataFrame(
+            {
+                "Date": dates,
+                "1 MO": 0.045,
+                "3 MO": 0.046,
+                "1 YR": 0.042,
+                "10 YR": 0.039,
+            }
+        )

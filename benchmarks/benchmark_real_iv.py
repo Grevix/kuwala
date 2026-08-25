@@ -5,11 +5,12 @@ Measures performance on realistic market option chains across multiple sizes:
 10K, 100K, 1,000,000 quotes.
 """
 
-import time
-import psutil
 import os
+import time
+
 import numpy as np
-import kuwala
+import psutil
+
 from kuwala.pricing.black_scholes import black_scholes
 from kuwala.volatility.iv import implied_volatility
 
@@ -18,7 +19,7 @@ def benchmark_real_iv():
     print("=" * 65)
     print("  KUWALA REAL-DATA BENCHMARK: IMPLIED VOLATILITY")
     print("=" * 65)
-    
+
     sizes = [10_000, 100_000, 1_000_000]
     np.random.seed(42)
     process = psutil.Process(os.getpid())
@@ -42,11 +43,13 @@ def benchmark_real_iv():
         t_elapsed = time.perf_counter() - t0
 
         err = np.abs(solved_iv - v)
-        rmse = np.sqrt(np.mean(err ** 2))
+        rmse = np.sqrt(np.mean(err**2))
         throughput = N / t_elapsed
         mem_mb = process.memory_info().rss / (1024 * 1024)
 
-        print(f"Quotes: {N:>10,} | Time: {t_elapsed*1000:>8.2f} ms | Throughput: {throughput:>12,.0f} opts/sec | RMSE: {rmse:.2e} | RSS: {mem_mb:.1f} MB")
+        print(
+            f"Quotes: {N:>10,} | Time: {t_elapsed * 1000:>8.2f} ms | Throughput: {throughput:>12,.0f} opts/sec | RMSE: {rmse:.2e} | RSS: {mem_mb:.1f} MB"
+        )
 
     print("=" * 65)
 

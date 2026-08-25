@@ -5,15 +5,16 @@ Durrleman (2002) Butterfly and Calendar Arbitrage Diagnostic Kernels.
 from __future__ import annotations
 
 from typing import List, Optional, Sequence
+
 import numpy as np
 
+from kuwala._core import get_rust_core, has_rust_core
 from kuwala.diagnostics.report import (
     ButterflyViolation,
     CalendarViolation,
-    SliceDiagnosticReport,
     DiagnosticReport,
+    SliceDiagnosticReport,
 )
-from kuwala._core import get_rust_core, has_rust_core
 
 
 def durrleman_g(k: float, w: float, dw: float, d2w: float) -> float:

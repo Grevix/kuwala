@@ -2,14 +2,14 @@
 Volatility and Surface Calibration Module.
 """
 
-from kuwala.volatility.iv import implied_volatility, extract_chain_iv
+from kuwala.volatility.iv import extract_chain_iv, implied_volatility
+from kuwala.volatility.local_vol import extract_dupire_local_volatility
 from kuwala.volatility.ssvi import (
-    SsviParameters,
     CalibrationConfig,
+    SsviParameters,
     calibrate_ssvi,
 )
-from kuwala.volatility.local_vol import extract_dupire_local_volatility
-from kuwala.volatility.surface import VolatilitySurface, SsviSurface, surface
+from kuwala.volatility.surface import SsviSurface, VolatilitySurface, surface
 
 __all__ = [
     "implied_volatility",

@@ -5,7 +5,8 @@ Black-76 European Commodity/Futures/Forward Option Analytical Pricing.
 from __future__ import annotations
 
 import math
-from typing import Union, Sequence
+from typing import Sequence, Union
+
 import numpy as np
 from scipy.stats import norm
 

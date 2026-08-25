@@ -5,13 +5,14 @@ High-Performance Implied Volatility Solver.
 from __future__ import annotations
 
 import math
-from typing import Union, Sequence, Optional, List
+from typing import List, Optional, Sequence, Union
+
 import numpy as np
 from scipy.optimize import brentq
 
-from kuwala.data.models import OptionChain, VolatilityObservation, OptionType
-from kuwala.pricing.black_scholes import black_scholes
 from kuwala._core import get_rust_core, has_rust_core
+from kuwala.data.models import OptionChain, VolatilityObservation
+from kuwala.pricing.black_scholes import black_scholes
 
 
 def implied_volatility(
@@ -72,9 +73,7 @@ def implied_volatility(
     q_arr = np.asarray(q, dtype=np.float64)
     call_arr = np.asarray(is_call, dtype=bool)
 
-    p_b, s_b, k_b, t_b, r_b, q_b, call_b = np.broadcast_arrays(
-        p_arr, s_arr, k_arr, t_arr, r_arr, q_arr, call_arr
-    )
+    p_b, s_b, k_b, t_b, r_b, q_b, call_b = np.broadcast_arrays(p_arr, s_arr, k_arr, t_arr, r_arr, q_arr, call_arr)
 
     if has_rust_core():
         try:

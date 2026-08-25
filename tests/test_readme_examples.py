@@ -3,15 +3,15 @@ Test suite validating that all code snippets presented in README.md execute with
 """
 
 from datetime import datetime, timedelta, timezone
-import pytest
+
 import numpy as np
 import pandas as pd
-import kuwala
-from kuwala.pricing.black_scholes import black_scholes
-from kuwala.volatility.surface import SsviSurface
-from kuwala.data.models import OptionQuote, OptionChain, OptionType
-from kuwala.signals import vrp
+
 from kuwala.backtest.vectorbt import to_vectorbt
+from kuwala.data.models import OptionChain, OptionQuote, OptionType
+from kuwala.pricing.black_scholes import black_scholes
+from kuwala.signals import vrp
+from kuwala.volatility.surface import SsviSurface
 
 
 def test_readme_quickstart_offline_mock():
@@ -21,7 +21,7 @@ def test_readme_quickstart_offline_mock():
     rate = 0.045
     div_yield = 0.015
     quotes = []
-    
+
     for days in [30, 60, 90]:
         ttm = days / 365.0
         expiry = now + timedelta(days=days)

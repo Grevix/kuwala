@@ -5,18 +5,13 @@ Kuwala: A Unified, Arbitrage-Checked Quantitative Options & Volatility Research 
 __version__ = "0.1.0"
 
 # Core submodules
-from kuwala import pricing
-from kuwala import volatility
-from kuwala import data
-from kuwala import diagnostics
-from kuwala import signals
-from kuwala import backtest
+from kuwala import backtest, data, diagnostics, pricing, signals, volatility
+from kuwala.data import OptionChain, OptionQuote, OptionType, clean_chain, fetch
 
 # Direct top-level ergonomic access
-from kuwala.pricing import black_scholes, black76, greeks, OptionGreeks
-from kuwala.volatility import implied_volatility, surface, VolatilitySurface, SsviSurface
-from kuwala.data import fetch, clean_chain, OptionChain, OptionQuote, OptionType
-from kuwala.signals import vrp, realized_volatility, validate_signal
+from kuwala.pricing import OptionGreeks, black76, black_scholes, greeks
+from kuwala.signals import realized_volatility, validate_signal, vrp
+from kuwala.volatility import SsviSurface, VolatilitySurface, implied_volatility, surface
 
 __all__ = [
     "__version__",

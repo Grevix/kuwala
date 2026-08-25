@@ -1,6 +1,7 @@
-import pytest
 import numpy as np
+
 import kuwala
+
 
 def test_dupire_flat_surface_consistency():
     # If implied volatility is constant sigma=0.20 across all expiries and strikes,
@@ -9,7 +10,7 @@ def test_dupire_flat_surface_consistency():
     k_grid = np.linspace(-0.2, 0.2, 30)
     w_mat = np.zeros((len(expiries), len(k_grid)))
     for i, t in enumerate(expiries):
-        w_mat[i, :] = (0.20 ** 2) * t
+        w_mat[i, :] = (0.20**2) * t
 
     surf = kuwala.volatility.VolatilitySurface("TEST", 100.0, expiries, k_grid, w_mat)
     loc_vol = surf.local_vol()

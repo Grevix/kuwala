@@ -5,8 +5,7 @@ Arbitrage Diagnostic Reports & Structured Inspection.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any
-import numpy as np
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -60,6 +59,7 @@ class DiagnosticReport:
     """
     Structured arbitrage diagnostic report for a calibrated volatility surface.
     """
+
     is_arbitrage_free: bool
     butterfly_passed: bool
     calendar_passed: bool

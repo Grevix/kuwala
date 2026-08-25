@@ -4,8 +4,9 @@ Real-Data Benchmark: Discrete Dupire Local Volatility PDE Extraction.
 """
 
 import time
+
 import numpy as np
-import kuwala
+
 from kuwala.volatility.local_vol import extract_dupire_local_volatility
 
 
@@ -19,7 +20,7 @@ def benchmark_real_dupire():
 
     # Construct total variance matrix w(k, T)
     T_grid, K_grid = np.meshgrid(expiries, k_grid, indexing="ij")
-    w_mat = (0.20 ** 2 + 0.05 * (K_grid ** 2) - 0.02 * K_grid) * T_grid
+    w_mat = (0.20**2 + 0.05 * (K_grid**2) - 0.02 * K_grid) * T_grid
 
     n_iter = 100
     t0 = time.perf_counter()
@@ -28,7 +29,9 @@ def benchmark_real_dupire():
     elapsed = time.perf_counter() - t0
 
     ms_per_eval = (elapsed / n_iter) * 1000
-    print(f"Iterations: {n_iter} | Grid Shape: {w_mat.shape} | Time: {elapsed:.3f} s | Avg Time: {ms_per_eval:.3f} ms/eval | Throughput: {n_iter/elapsed:,.0f} surfaces/sec")
+    print(
+        f"Iterations: {n_iter} | Grid Shape: {w_mat.shape} | Time: {elapsed:.3f} s | Avg Time: {ms_per_eval:.3f} ms/eval | Throughput: {n_iter / elapsed:,.0f} surfaces/sec"
+    )
     print("=" * 65)
 
 

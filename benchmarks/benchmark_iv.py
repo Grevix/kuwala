@@ -2,10 +2,13 @@
 Reproducible Implied Volatility Benchmark Suite.
 """
 
-import time
 import platform
+import time
+
 import numpy as np
+
 import kuwala
+
 
 def run_benchmark():
     print("==========================================================")
@@ -36,10 +39,11 @@ def run_benchmark():
     rmse = np.sqrt(np.nanmean((recovered_ivs - vols) ** 2))
 
     print(f"Processed:          {N:,} option quotes")
-    print(f"Total Time:         {elapsed*1000:.2f} ms")
+    print(f"Total Time:         {elapsed * 1000:.2f} ms")
     print(f"Throughput:         {throughput:,.0f} options/sec")
     print(f"Accuracy (RMSE):    {rmse:.2e}")
     print("==========================================================")
+
 
 if __name__ == "__main__":
     run_benchmark()

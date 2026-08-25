@@ -6,7 +6,8 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Optional, Union, List, Any
+from typing import Any, List, Optional, Union
+
 import duckdb
 import pandas as pd
 import pyarrow as pa
@@ -80,10 +81,10 @@ class DataStore:
 
         self.conn.register("tmp_incoming_chain", df)
         self.conn.execute("""
-            INSERT INTO options_chains 
-            SELECT 
-                underlying, timestamp, expiry, strike, option_type, 
-                bid, ask, mid, last, volume, open_interest, implied_volatility, 
+            INSERT INTO options_chains
+            SELECT
+                underlying, timestamp, expiry, strike, option_type,
+                bid, ask, mid, last, volume, open_interest, implied_volatility,
                 spot, rate, dividend_yield, ttm, log_moneyness
             FROM tmp_incoming_chain
         """)
@@ -91,13 +92,13 @@ class DataStore:
 
         # Sanitize underlying for directory name
         raw_symbol = str(df["underlying"].iloc[0])
-        safe_symbol = re.sub(r'[^a-zA-Z0-9_-]', '_', raw_symbol)
-        
+        safe_symbol = re.sub(r"[^a-zA-Z0-9_-]", "_", raw_symbol)
+
         parquet_dir = self.base_dir / "parquet" / f"underlying={safe_symbol}"
         parquet_dir.mkdir(parents=True, exist_ok=True)
         date_str = pd.to_datetime(df["timestamp"].iloc[0]).strftime("%Y%m%d_%H%M%S")
         file_path = parquet_dir / f"chain_{date_str}.parquet"
-        
+
         table = pa.Table.from_pandas(df)
         pq.write_table(table, file_path)
         return len(df)
@@ -112,7 +113,7 @@ class DataStore:
 
     def get_latest_chain(self, underlying: str) -> pd.DataFrame:
         query = """
-            SELECT * FROM options_chains 
+            SELECT * FROM options_chains
             WHERE underlying = ?
             AND timestamp = (SELECT MAX(timestamp) FROM options_chains WHERE underlying = ?)
         """

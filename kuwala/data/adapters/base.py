@@ -11,8 +11,7 @@ wheels, or artifacts.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
-import pandas as pd
+from typing import Any
 
 
 class BaseAdapter(ABC):

@@ -4,7 +4,8 @@ Zero-Copy Apache Arrow & VectorBT Connector.
 
 from __future__ import annotations
 
-from typing import Union, Optional, Dict, Any
+from typing import Dict, Union
+
 import numpy as np
 import pandas as pd
 import pyarrow as pa
@@ -40,7 +41,7 @@ def to_vectorbt(
 
     entries = (df[signal_col] > 0).to_frame(name="long_entry")
     exits = (df[signal_col] < 0).to_frame(name="short_entry")
-    
+
     price_df = df[[price_col]] if price_col in df.columns else pd.DataFrame({"close": 100.0}, index=df.index)
 
     return {

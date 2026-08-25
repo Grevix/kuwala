@@ -4,7 +4,8 @@ FRED (Federal Reserve Bank of St. Louis) Macro & Rate Curve Adapter.
 
 from __future__ import annotations
 
-from typing import Optional, Dict, Any
+from typing import Dict, Optional
+
 import numpy as np
 import pandas as pd
 import requests
@@ -85,7 +86,7 @@ class FredAdapter(BaseAdapter):
         for tenor, sid in tenor_series.items():
             df = self.fetch(sid, api_key=api_key)
             if not df.empty:
-                val = float(df["value"].iloc[-1]) / 100.0 # convert percentage to decimal
+                val = float(df["value"].iloc[-1]) / 100.0  # convert percentage to decimal
                 curve[tenor] = val
             else:
                 curve[tenor] = 0.04
@@ -104,8 +105,10 @@ class FredAdapter(BaseAdapter):
         dates = pd.date_range(end=pd.Timestamp.now(tz="UTC"), periods=30, freq="D")
         rates = {"DGS3MO": 0.045, "DGS1": 0.042, "DGS2": 0.040, "DGS5": 0.039, "DGS10": 0.038}
         rate_val = rates.get(series_id, 0.04)
-        return pd.DataFrame({
-            "date": dates,
-            "value": [rate_val * 100.0] * len(dates),
-            "series_id": series_id,
-        })
+        return pd.DataFrame(
+            {
+                "date": dates,
+                "value": [rate_val * 100.0] * len(dates),
+                "series_id": series_id,
+            }
+        )

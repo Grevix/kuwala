@@ -2,17 +2,17 @@
 Arbitrage Diagnostics Module.
 """
 
-from kuwala.diagnostics.report import (
-    ButterflyViolation,
-    CalendarViolation,
-    SliceDiagnosticReport,
-    DiagnosticReport,
-)
 from kuwala.diagnostics.arbitrage import (
-    durrleman_g,
     check_butterfly_slice,
     check_calendar_arbitrage,
     diagnose_surface,
+    durrleman_g,
+)
+from kuwala.diagnostics.report import (
+    ButterflyViolation,
+    CalendarViolation,
+    DiagnosticReport,
+    SliceDiagnosticReport,
 )
 
 __all__ = [

@@ -3,16 +3,17 @@ End-to-End Real Pipeline Benchmark: Data -> Clean -> IV -> SSVI -> Dupire -> VRP
 =============================================================================================
 """
 
-import time
-import psutil
 import os
-import kuwala
+import time
+
+import psutil
+
+from kuwala.backtest.vectorbt import to_vectorbt
 from kuwala.data.adapters import YahooAdapter
 from kuwala.data.pipeline import clean_chain
-from kuwala.volatility.surface import SsviSurface
-from kuwala.signals.vrp import vrp
-from kuwala.backtest.vectorbt import to_vectorbt
 from kuwala.data.store import get_store
+from kuwala.signals.vrp import vrp
+from kuwala.volatility.surface import SsviSurface
 
 
 def benchmark_end_to_end_real():

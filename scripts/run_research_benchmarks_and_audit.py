@@ -5,19 +5,18 @@ Benchmarks DuckDB out-of-core persistence, Arrow conversion, Rust vs Python
 Greeks & IV, and compiles full Stage-1 documentation.
 """
 
-import time
 import json
-import psutil
 import os
+import time
 from pathlib import Path
-import pandas as pd
-import numpy as np
 
-import kuwala
-from kuwala.pricing.black_scholes import black_scholes, _black_scholes_scalar_py
-from kuwala.pricing.greeks import greeks
-from kuwala.volatility.iv import implied_volatility
+import numpy as np
+import pandas as pd
+import psutil
+
 from kuwala.data.store import get_store
+from kuwala.pricing.black_scholes import black_scholes
+from kuwala.volatility.iv import implied_volatility
 
 DATA_DIR = Path("research/data")
 benchmark_results = {}
@@ -36,13 +35,15 @@ def benchmark_large_real_datasets():
         df_sp = pd.read_csv(f_sp500)
         t_load = time.perf_counter() - t0
         row_count = len(df_sp)
-        print(f"  Loaded {row_count:,} real S&P 500 rows in {t_load:.2f}s ({row_count/t_load:,.0f} rows/sec)")
+        print(f"  Loaded {row_count:,} real S&P 500 rows in {t_load:.2f}s ({row_count / t_load:,.0f} rows/sec)")
 
         # Benchmarking DuckDB query
         t0 = time.perf_counter()
         query_res = store.query("SELECT count(*) as total_quotes FROM options_chains")
         t_query = (time.perf_counter() - t0) * 1000
-        print(f"  DuckDB Columnar Query Latency: {t_query:.2f}ms (Total Quotes in DB: {query_res['total_quotes'].iloc[0]})")
+        print(
+            f"  DuckDB Columnar Query Latency: {t_query:.2f}ms (Total Quotes in DB: {query_res['total_quotes'].iloc[0]})"
+        )
 
         benchmark_results["data_pipeline_scale"] = {
             "dataset": "S&P 500 Multi-Asset (jacksaleeby)",
@@ -75,8 +76,10 @@ def benchmark_rust_vs_python_pricing():
     rust_iv = implied_volatility(rust_prices, s, k, t, r, q, is_call=True)
     t_iv_rust = time.perf_counter() - t0
 
-    print(f"  Rust Vectorized Black-Scholes ({N:,} options): {t_rust*1000:.2f}ms ({N/t_rust:,.0f} opts/sec)")
-    print(f"  Rust Vectorized Halley IV Solver ({N:,} options): {t_iv_rust*1000:.2f}ms ({N/t_iv_rust:,.0f} opts/sec)")
+    print(f"  Rust Vectorized Black-Scholes ({N:,} options): {t_rust * 1000:.2f}ms ({N / t_rust:,.0f} opts/sec)")
+    print(
+        f"  Rust Vectorized Halley IV Solver ({N:,} options): {t_iv_rust * 1000:.2f}ms ({N / t_iv_rust:,.0f} opts/sec)"
+    )
 
     benchmark_results["rust_pricing_throughput"] = {
         "options_count": N,
@@ -175,21 +178,23 @@ def record_bugs():
         "",
     ]
     for b in bugs:
-        lines_bug.extend([
-            f"### [{b['bug_id']}] {b['component']} — Severity: `{b['severity']}`",
-            f"- **Date**: {b['date']}",
-            f"- **Dataset / Trigger**: {b['dataset']}",
-            f"- **Input**: `{b['input']}`",
-            f"- **Expected Behavior**: {b['expected']}",
-            f"- **Actual Behavior**: `{b['actual']}`",
-            f"- **Root Cause**: {b['root_cause']}",
-            f"- **Resolution**: {b['fix']}",
-            f"- **Regression Test**: `{b['regression_test']}`",
-            f"- **Status**: **{b['verification']}**",
-            "",
-            "---",
-            "",
-        ])
+        lines_bug.extend(
+            [
+                f"### [{b['bug_id']}] {b['component']} — Severity: `{b['severity']}`",
+                f"- **Date**: {b['date']}",
+                f"- **Dataset / Trigger**: {b['dataset']}",
+                f"- **Input**: `{b['input']}`",
+                f"- **Expected Behavior**: {b['expected']}",
+                f"- **Actual Behavior**: `{b['actual']}`",
+                f"- **Root Cause**: {b['root_cause']}",
+                f"- **Resolution**: {b['fix']}",
+                f"- **Regression Test**: `{b['regression_test']}`",
+                f"- **Status**: **{b['verification']}**",
+                "",
+                "---",
+                "",
+            ]
+        )
 
     with open("research/BUGS_FOUND.md", "w") as f:
         f.write("\n".join(lines_bug))

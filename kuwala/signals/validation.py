@@ -5,7 +5,8 @@ Overfitting-Aware Time-Series Validation Harness & Purged K-Fold Cross Validatio
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple, Optional, Callable, Any
+from typing import List, Tuple
+
 import numpy as np
 import pandas as pd
 
@@ -35,7 +36,9 @@ class ValidationReport:
     fold_results: List[ValidationFoldResult] = field(default_factory=list)
 
     def summary(self) -> str:
-        status = "SUSPECTED (High Degradation / Leakage)" if self.is_overfit_suspected else "PASSED (Robust Generalization)"
+        status = (
+            "SUSPECTED (High Degradation / Leakage)" if self.is_overfit_suspected else "PASSED (Robust Generalization)"
+        )
         lines = [
             "===========================================================",
             f"  KUWALA SIGNAL VALIDATION REPORT: {self.method.upper()}",
@@ -79,8 +82,8 @@ def purged_kfold_split(
         test_idx = indices[test_start:test_end]
 
         # Purge & embargo training indices around test set
-        train_left = indices[:max(0, test_start - embargo_size)]
-        train_right = indices[min(n_samples, test_end + embargo_size):]
+        train_left = indices[: max(0, test_start - embargo_size)]
+        train_right = indices[min(n_samples, test_end + embargo_size) :]
         train_idx = np.concatenate([train_left, train_right])
 
         splits.append((train_idx, test_idx))

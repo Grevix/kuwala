@@ -4,7 +4,7 @@ Real-Data Benchmark: Data Fetching, Normalization & DuckDB Out-of-Core Storage.
 """
 
 import time
-import kuwala
+
 from kuwala.data.adapters import YahooAdapter
 from kuwala.data.pipeline import clean_chain
 from kuwala.data.store import get_store
@@ -29,7 +29,9 @@ def benchmark_real_data_pipeline():
         total_quotes += len(cleaned)
 
     elapsed = time.perf_counter() - t0
-    print(f"Tickers Processed: {len(tickers)} | Total Quotes: {total_quotes:,} | Time: {elapsed:.2f} s | Storage Throughput: {total_quotes/elapsed:,.0f} quotes/sec")
+    print(
+        f"Tickers Processed: {len(tickers)} | Total Quotes: {total_quotes:,} | Time: {elapsed:.2f} s | Storage Throughput: {total_quotes / elapsed:,.0f} quotes/sec"
+    )
     print("=" * 65)
 
 
