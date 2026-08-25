@@ -37,6 +37,7 @@ dependencies = [
     "requests>=2.28.0",
     "python-dotenv>=1.0.0",
     "matplotlib>=3.6.0",
+    "msgpack>=1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -72,3 +73,16 @@ target-version = "py39"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
 ignore = ["E501", "F841"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [
+    "reference_repos",
+    "research",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+    "target",
+    "*.egg-info",
+]
