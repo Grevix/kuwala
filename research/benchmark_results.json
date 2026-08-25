@@ -1,0 +1,47 @@
+{
+  "ohlc_ingestion": {
+    "cases": 2500,
+    "runtime_s": 3.8636931000000914,
+    "throughput_rows_sec": 647.0493218004144
+  },
+  "realized_volatility": {
+    "cases": 1600,
+    "runtime_s": 4.562690199996723,
+    "throughput_cases_sec": 350.67031287838677
+  },
+  "technical_indicators": {
+    "cases": 1100,
+    "runtime_s": 2.266214700001001,
+    "throughput_cases_sec": 485.39090316531536
+  },
+  "option_ingestion": {
+    "cases": 2600,
+    "runtime_s": 13.43264740000086,
+    "throughput_contracts_sec": 193.55827057589806
+  },
+  "iv_solver": {
+    "cases": 1600,
+    "runtime_s": 0.007141400001273723,
+    "throughput_opts_sec": 224045.7052839258,
+    "mae": 9.42555981530607e-09,
+    "rmse": 1.549460976638359e-08,
+    "max_error": 6.772526717213623e-08,
+    "p95": 3.804338710722277e-08,
+    "p99": 5.362974988543102e-08
+  },
+  "pricing_greeks": {
+    "cases": 800,
+    "runtime_s": 0.004487400001380593,
+    "throughput_cases_sec": 178276.95319202036
+  },
+  "storage_integrity": {
+    "cases": 555,
+    "runtime_s": 0.5456751000019722,
+    "throughput_queries_sec": 1017.0887401642372
+  },
+  "end_to_end": {
+    "cases": 260,
+    "runtime_s": 2.82918680000148,
+    "throughput_cases_sec": 91.8991987379073
+  }
+}
