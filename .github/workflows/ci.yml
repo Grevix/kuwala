@@ -35,7 +35,7 @@ jobs:
         run: cargo check --workspace --all-targets
 
       - name: Cargo Test
-        run: cargo test --workspace
+        run: cargo test --workspace --no-default-features
 
   python-test:
     name: Python Tests (${{ matrix.os }} / Python ${{ matrix.python-version }})
