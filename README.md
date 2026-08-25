@@ -69,16 +69,16 @@ In quantitative derivatives research, researchers frequently assemble a fragile 
 
 ```mermaid
 flowchart TD
-    A[Raw Market Data<br>Yahoo / FRED / SEC / Dukascopy] --> B[Data Layer & Normalization<br>UTC Timestamp, Day-Counts, Dividends]
-    B --> C[Canonical Data Store<br>Apache Arrow & DuckDB Parquet]
-    C --> D[Compiled Rust Core<br>Vectorized IV & Halley Root Finder]
-    D --> E[SSVI Volatility Surface<br>Multi-Start Global Calibration]
-    E --> F{Arbitrage Diagnostics<br>Durrleman g(k) & Calendar Monotonicity}
-    F -->|Verified Clean| G[Dupire Local Volatility<br>Discrete PDE Solver]
-    F -->|Report Diagnostics| H[Relative-Value Signals<br>VRP, Skew, Surface PCA]
-    G --> I[Overfitting Validation<br>Purged K-Fold & Walk-Forward]
+    A["Raw Market Data<br/>Yahoo / FRED / SEC / Dukascopy"] --> B["Data Layer & Normalization<br/>UTC Timestamp, Day-Counts, Dividends"]
+    B --> C["Canonical Data Store<br/>Apache Arrow & DuckDB Parquet"]
+    C --> D["Compiled Rust Core<br/>Vectorized IV & Halley Root Finder"]
+    D --> E["SSVI Volatility Surface<br/>Multi-Start Global Calibration"]
+    E --> F{"Arbitrage Diagnostics<br/>Durrleman g(k) & Calendar Monotonicity"}
+    F -->|Verified Clean| G["Dupire Local Volatility<br/>Discrete PDE Solver"]
+    F -->|Report Diagnostics| H["Relative-Value Signals<br/>VRP, Skew, Surface PCA"]
+    G --> I["Overfitting Validation<br/>Purged K-Fold & Walk-Forward"]
     H --> I
-    I --> J[Backtesting Bridges<br>VectorBT & Backtrader Connectors]
+    I --> J["Backtesting Bridges<br/>VectorBT & Backtrader Connectors"]
 ```
 
 ---
