@@ -1,0 +1,24 @@
+[
+    {
+        "experiment_id": "EXP-01",
+        "title": "Realized Volatility Forecasting on S&P 500",
+        "dataset": "s_and_p500_jacksaleeby",
+        "train_period": "2000 to 2018",
+        "test_period": "2019 to 2026",
+        "baseline_rmse": 0.030307181828385682,
+        "model_rmse": 0.028197142248385248,
+        "baseline_mae": 0.019455649064988936,
+        "model_mae": 0.01847007065187857,
+        "rmse_improvement_pct": 6.96,
+        "status": "PASSED (Beats Naive Baseline Out-of-Sample)"
+    },
+    {
+        "experiment_id": "EXP-02",
+        "title": "High-Frequency Realized Volatility Estimator Stress",
+        "dataset": "nasdaq100_novandra_15m",
+        "rows_processed": 206703,
+        "throughput_bars_per_sec": 2109197,
+        "positivity_passed": true,
+        "status": "PASSED (Zero numerical degradation)"
+    }
+]

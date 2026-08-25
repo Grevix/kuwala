@@ -1,0 +1,17 @@
+{
+    "data_pipeline_scale": {
+        "dataset": "S&P 500 Multi-Asset (jacksaleeby)",
+        "rows": 2703531,
+        "load_time_s": 1.636,
+        "throughput_rows_per_sec": 1652482,
+        "duckdb_query_ms": 22.2,
+        "rss_memory_mb": 420.14
+    },
+    "rust_pricing_throughput": {
+        "options_count": 100000,
+        "black_scholes_ms": 33.72,
+        "black_scholes_opts_per_sec": 2965986,
+        "iv_solver_ms": 37.09,
+        "iv_solver_opts_per_sec": 2695904
+    }
+}

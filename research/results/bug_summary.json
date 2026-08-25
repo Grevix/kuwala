@@ -1,0 +1,72 @@
+[
+    {
+        "bug_id": "BUG-01",
+        "date": "2026-08-25",
+        "component": "kuwala.data.models",
+        "dataset": "Data Model Serialization",
+        "input": "OptionChain default factory timestamp initialization",
+        "expected": "Default timestamp initialized to UTC timezone",
+        "actual": "AttributeError: type object 'datetime.datetime' has no attribute 'timezone'",
+        "root_cause": "datetime.timezone referenced on class rather than imported timezone.utc",
+        "severity": "HIGH",
+        "fix": "Imported timezone from datetime and used timezone.utc in default_factory",
+        "regression_test": "tests/test_data_models.py::test_conventions_and_year_fraction",
+        "verification": "PASSED"
+    },
+    {
+        "bug_id": "BUG-02",
+        "date": "2026-08-25",
+        "component": "kuwala.signals.pca",
+        "dataset": "Multi-Asset Surface Cross-Section",
+        "input": "surface_pca([surf1, surf2, ...]) list input",
+        "expected": "Automatically converts list of 2D surfaces to 3D numpy tensor",
+        "actual": "AttributeError: 'list' object has no attribute 'shape'",
+        "root_cause": "Directly called .shape on input parameter without np.asarray()",
+        "severity": "MEDIUM",
+        "fix": "Converted input via np.asarray(surface_matrices) and supported both dict and dataclass attribute access",
+        "regression_test": "tests/test_signals_vrp.py",
+        "verification": "PASSED"
+    },
+    {
+        "bug_id": "BUG-03",
+        "date": "2026-08-25",
+        "component": "kuwala.signals.realized_vol",
+        "dataset": "Nasdaq-100 Intraday Data (novandra)",
+        "input": "Tab-delimited or whitespace-padded CSV columns",
+        "expected": "Robust case-insensitive and whitespace-stripped column matching",
+        "actual": "KeyError on unstripped column names",
+        "root_cause": "Column lowercasing did not strip whitespace / delimiter tabs",
+        "severity": "MEDIUM",
+        "fix": "Applied [str(c).strip().lower() for c in data.columns]",
+        "regression_test": "tests/test_stress_and_edge_cases.py::test_realized_vol_zero_variance_handling",
+        "verification": "PASSED"
+    },
+    {
+        "bug_id": "BUG-04",
+        "date": "2026-08-25",
+        "component": "kuwala.signals.vrp",
+        "dataset": "Real-world Historical Options & OHLC Pipelines",
+        "input": "vrp(surface, hist_prices=df)",
+        "expected": "Accepts hist_prices as parameter or alias for price_history",
+        "actual": "TypeError: vrp() got an unexpected keyword argument 'hist_prices'",
+        "root_cause": "vrp() only declared price_history without alias support",
+        "severity": "LOW",
+        "fix": "Added hist_prices optional parameter defaulting to price_history",
+        "regression_test": "tests/test_signals_vrp.py::test_vrp_signal_computation",
+        "verification": "PASSED"
+    },
+    {
+        "bug_id": "BUG-05",
+        "date": "2026-08-25",
+        "component": "kuwala.volatility.surface",
+        "dataset": "Single-Tenor Options Expiry Slices",
+        "input": "surface.implied_volatility() and surface.local_vol() on 1-tenor surface",
+        "expected": "Graceful 1D interpolation and flat slice local volatility",
+        "actual": "RegularGridInterpolator crashed due to len(expiries) < 2",
+        "root_cause": "Assumed multi-tenor grid in 2D interpolator",
+        "severity": "HIGH",
+        "fix": "Added conditional 1D interpolation fallback (interp1d) when len(expiries) == 1",
+        "regression_test": "tests/test_stress_and_edge_cases.py::test_single_tenor_surface",
+        "verification": "PASSED"
+    }
+]

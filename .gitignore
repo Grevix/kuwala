@@ -1,0 +1,68 @@
+# Byte-compiled / optimized / C-extensions
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.dll
+*.dylib
+*.obj
+*.o
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+sdist/
+MANIFEST
+
+# Rust / Cargo
+target/
+Cargo.lock
+
+# Environment & Secrets (NEVER COMMIT)
+.env
+.env.*
+!.env.example
+*.secret
+*.key
+*.pem
+*.token
+
+# Private / Internal Planning Materials
+*Blueprint*
+*blueprint*
+*.internal.md
+
+# Large Data, Local DBs & Caches
+*.parquet
+*.duckdb
+*.duckdb.wal
+*.csv
+research/data/
+research_data/
+reference_repos/
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing & Linting Caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Temporary / Scratch
+scratch/
+*.tmp

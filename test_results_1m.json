@@ -1,0 +1,16 @@
+{
+    "total_cases": 1000000,
+    "passed": 998021,
+    "failed": 1979,
+    "skipped": 0,
+    "warnings": 0,
+    "max_error": 0.21976106805269902,
+    "mean_error": 0.00035143968142924945,
+    "p95_error": 2.0653208212206754e-06,
+    "p99_error": 5.704546423966597e-05,
+    "convergence_failures": 0,
+    "nan_count": 0,
+    "inf_count": 0,
+    "runtime_seconds": 16.756,
+    "peak_memory_mb": 255.51
+}

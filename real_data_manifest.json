@@ -1,0 +1,123 @@
+[
+    {
+        "source": "Yahoo Finance / FRED",
+        "dataset": "SPY_OPTIONS_CHAIN",
+        "instrument": "SPY",
+        "date_range": "2026-08-25 to 2027-02-21",
+        "download_timestamp": "2026-08-25T17:30:15.204293+00:00",
+        "row_count": 56,
+        "file_size_bytes": 11923,
+        "schema_hash": "cd75d010c0863489",
+        "data_hash": "135584ad2df73384"
+    },
+    {
+        "source": "Yahoo Finance / FRED",
+        "dataset": "QQQ_OPTIONS_CHAIN",
+        "instrument": "QQQ",
+        "date_range": "2026-08-25 to 2027-02-21",
+        "download_timestamp": "2026-08-25T17:30:18.935289+00:00",
+        "row_count": 55,
+        "file_size_bytes": 11668,
+        "schema_hash": "cd75d010c0863489",
+        "data_hash": "281cda08b3240543"
+    },
+    {
+        "source": "Yahoo Finance / FRED",
+        "dataset": "AAPL_OPTIONS_CHAIN",
+        "instrument": "AAPL",
+        "date_range": "2026-08-25 to 2027-02-21",
+        "download_timestamp": "2026-08-25T17:30:21.920284+00:00",
+        "row_count": 55,
+        "file_size_bytes": 11723,
+        "schema_hash": "cd75d010c0863489",
+        "data_hash": "9cb60af372ef4f5d"
+    },
+    {
+        "source": "Yahoo Finance / FRED",
+        "dataset": "MSFT_OPTIONS_CHAIN",
+        "instrument": "MSFT",
+        "date_range": "2026-08-25 to 2027-02-21",
+        "download_timestamp": "2026-08-25T17:30:25.249952+00:00",
+        "row_count": 55,
+        "file_size_bytes": 11723,
+        "schema_hash": "cd75d010c0863489",
+        "data_hash": "2202ba89afc8813f"
+    },
+    {
+        "source": "Yahoo Finance / FRED",
+        "dataset": "NVDA_OPTIONS_CHAIN",
+        "instrument": "NVDA",
+        "date_range": "2026-08-25 to 2027-02-21",
+        "download_timestamp": "2026-08-25T17:30:29.171106+00:00",
+        "row_count": 55,
+        "file_size_bytes": 11723,
+        "schema_hash": "cd75d010c0863489",
+        "data_hash": "ae40c296a8bebfb4"
+    },
+    {
+        "source": "Yahoo Finance / FRED",
+        "dataset": "AMZN_OPTIONS_CHAIN",
+        "instrument": "AMZN",
+        "date_range": "2026-08-25 to 2027-02-21",
+        "download_timestamp": "2026-08-25T17:30:32.509596+00:00",
+        "row_count": 55,
+        "file_size_bytes": 11723,
+        "schema_hash": "cd75d010c0863489",
+        "data_hash": "ffaf630f14f9836f"
+    },
+    {
+        "source": "Yahoo Finance / FRED",
+        "dataset": "GOOG_OPTIONS_CHAIN",
+        "instrument": "GOOG",
+        "date_range": "2026-08-25 to 2027-02-21",
+        "download_timestamp": "2026-08-25T17:30:35.501358+00:00",
+        "row_count": 55,
+        "file_size_bytes": 11723,
+        "schema_hash": "cd75d010c0863489",
+        "data_hash": "867a42b468166d23"
+    },
+    {
+        "source": "Yahoo Finance / FRED",
+        "dataset": "META_OPTIONS_CHAIN",
+        "instrument": "META",
+        "date_range": "2026-08-25 to 2027-02-21",
+        "download_timestamp": "2026-08-25T17:30:38.413853+00:00",
+        "row_count": 55,
+        "file_size_bytes": 11723,
+        "schema_hash": "cd75d010c0863489",
+        "data_hash": "1d172b9ccda56571"
+    },
+    {
+        "source": "Yahoo Finance / FRED",
+        "dataset": "TSLA_OPTIONS_CHAIN",
+        "instrument": "TSLA",
+        "date_range": "2026-08-25 to 2027-02-21",
+        "download_timestamp": "2026-08-25T17:30:41.629648+00:00",
+        "row_count": 55,
+        "file_size_bytes": 11723,
+        "schema_hash": "cd75d010c0863489",
+        "data_hash": "7b8231cdd1c76ae8"
+    },
+    {
+        "source": "Yahoo Finance / FRED",
+        "dataset": "IWM_OPTIONS_CHAIN",
+        "instrument": "IWM",
+        "date_range": "2026-08-25 to 2027-02-21",
+        "download_timestamp": "2026-08-25T17:30:44.766143+00:00",
+        "row_count": 55,
+        "file_size_bytes": 11668,
+        "schema_hash": "cd75d010c0863489",
+        "data_hash": "b7c3dfb34abed298"
+    },
+    {
+        "source": "Yahoo Finance / FRED",
+        "dataset": "DIA_OPTIONS_CHAIN",
+        "instrument": "DIA",
+        "date_range": "2026-08-25 to 2027-02-21",
+        "download_timestamp": "2026-08-25T17:30:48.456678+00:00",
+        "row_count": 55,
+        "file_size_bytes": 11668,
+        "schema_hash": "cd75d010c0863489",
+        "data_hash": "48749bec11abd7b7"
+    }
+]
