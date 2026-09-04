@@ -59,17 +59,18 @@ jobs:
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install dependencies
+      - name: Install dependencies & build Rust core
         run: |
           python -m pip install --upgrade pip
           pip install maturin ruff pytest pytest-cov
           pip install -e .
+          maturin develop -m kuwala_core/Cargo.toml
 
       - name: Lint with Ruff
         run: ruff check .
 
       - name: Run Pytest Suite
-        run: pytest -v --cov=kuwala tests/
+        run: pytest -v --ignore=reference_repos tests/
 
       - name: Run 2-Minute Quickstart Smoke Test
         run: python examples/quickstart_2min.py

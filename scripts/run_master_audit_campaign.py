@@ -11,7 +11,6 @@ import csv
 import json
 import math
 import os
-import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,6 +19,18 @@ from typing import Any, Dict, List
 import numpy as np
 import pandas as pd
 import yfinance as yf
+
+from kuwala.config import get_config
+from kuwala.data.adapters.fred import FredAdapter
+from kuwala.data.curves import CubicSplineCurve, NelsonSiegelCurve
+from kuwala.data.microstructure import aggregate_ticks_to_bars
+from kuwala.data.store import DataStore
+from kuwala.pricing.black_scholes import black_scholes
+from kuwala.volatility.iv import implied_volatility
+from kuwala.volatility.local_vol import extract_dupire_local_volatility
+from kuwala.volatility.ssvi import SsviParameters
+from kuwala.volatility.surface import SsviSurface
+
 
 def safe_float(v: Any, default: float = 0.0) -> float:
     if v is None:
@@ -30,6 +41,7 @@ def safe_float(v: Any, default: float = 0.0) -> float:
     except Exception:
         return default
 
+
 def safe_int(v: Any, default: int = 0) -> int:
     if v is None:
         return default
@@ -38,25 +50,6 @@ def safe_int(v: Any, default: int = 0) -> int:
         return default if math.isnan(f) else int(f)
     except Exception:
         return default
-
-
-import kuwala
-from kuwala.config import get_config
-from kuwala.data.adapters.fred import FredAdapter
-from kuwala.data.curves import CubicSplineCurve, NelsonSiegelCurve, bootstrap_treasury_curve
-from kuwala.data.forward import extract_forward_from_chain
-from kuwala.data.microstructure import aggregate_ticks_to_bars
-from kuwala.data.models import OptionChain, OptionQuote, OptionType
-from kuwala.data.store import DataStore
-from kuwala.diagnostics.arbitrage import check_butterfly_slice, check_calendar_arbitrage, diagnose_surface, durrleman_g
-from kuwala.pricing.black76 import black76
-from kuwala.pricing.black_scholes import black_scholes
-from kuwala.pricing.greeks import greeks
-from kuwala.signals.realized_vol import RealizedVolEstimator, realized_volatility
-from kuwala.volatility.iv import implied_volatility
-from kuwala.volatility.local_vol import extract_dupire_local_volatility
-from kuwala.volatility.ssvi import SsviParameters
-from kuwala.volatility.surface import SsviSurface
 
 RESULTS = {
     "counts": {
@@ -96,7 +89,7 @@ def run_credential_audit() -> Dict[str, Any]:
     print("="*80)
     cfg = get_config()
     cred_report = {}
-    
+
     # Check FRED
     has_fred = bool(cfg.fred_api_key)
     fred_status = "NOT PRESENT"
@@ -130,8 +123,8 @@ def run_credential_audit() -> Dict[str, Any]:
         f.write(f"| FRED | {'YES' if has_fred else 'NO'} | DGS10 Observations Query | {fred_status} | None |\n")
         f.write(f"| Nasdaq Data Link | {'YES' if has_nasdaq else 'NO'} | Environment Config Check | {nasdaq_status} | None |\n")
         f.write(f"| GS Quant | {'YES' if has_gs else 'NO'} | Marquee Auth Check | NOT PRESENT | Unauthenticated (Local timeseries only) |\n")
-        f.write(f"| Yahoo Finance (yfinance) | N/A (Public) | SPY/QQQ Real Option Chains & OHLCV | VERIFIED | None |\n")
-        f.write(f"| SEC EDGAR | N/A (User-Agent header) | User-Agent compliance check | VERIFIED | None |\n")
+        f.write("| Yahoo Finance (yfinance) | N/A (Public) | SPY/QQQ Real Option Chains & OHLCV | VERIFIED | None |\n")
+        f.write("| SEC EDGAR | N/A (User-Agent header) | User-Agent compliance check | VERIFIED | None |\n")
 
     return cred_report
 
@@ -142,18 +135,18 @@ def run_real_market_options_campaign():
     print("="*80)
     symbols = ["SPY", "QQQ", "AAPL", "MSFT"]
     csv_path = Path("REAL_IV_VALIDATION.csv")
-    
+
     total_obs = 0
     valid_obs = 0
     rejected_obs = 0
     errors: List[float] = []
-    
+
     csv_rows = []
 
     # Check put-call parity stats
     parity_liquid_errors = []
     parity_illiquid_errors = []
-    
+
     for sym in symbols:
         print(f"  Ingesting real market data and option chains for {sym}...")
         t = yf.Ticker(sym)
@@ -216,7 +209,7 @@ def run_real_market_options_campaign():
                         oi_val = safe_int(row.get("openInterest"))
 
                         mid = 0.5 * (bid + ask) if (bid > 0 and ask > 0) else last_p
-                        
+
                         # Arbitrage rejection bounds
                         intrinsic = max(0.0, (spot * math.exp(-q * ttm) - strike * df_disc)) if is_call else max(0.0, (strike * df_disc - spot * math.exp(-q * ttm)))
                         max_price = spot if is_call else strike * df_disc
@@ -356,10 +349,10 @@ def run_real_fred_macro_validation():
         20.0: "DGS20",
         30.0: "DGS30"
     }
-    
+
     tenors = []
     observed_rates = []
-    
+
     for t, sid in pillars.items():
         try:
             df = adapter.fetch(series_id=sid)
@@ -399,7 +392,7 @@ def run_ssvi_and_dupire_validation():
     expiries = [0.083, 0.25, 0.50, 1.0, 2.0]
     thetas = [0.015, 0.035, 0.065, 0.110, 0.190]
     k_grid = np.linspace(-0.35, 0.35, 31)
-    
+
     # Test Gatheral-Jacquier Durrleman condition on calibrated surface
     params = SsviParameters(
         rho=-0.35,
@@ -415,7 +408,7 @@ def run_ssvi_and_dupire_validation():
         k_grid=k_grid,
         rate=0.04
     )
-    
+
     # Check calendar monotonicity across expiries
     w_matrix = ssvi.w_matrix
     for i in range(w_matrix.shape[0]):
@@ -439,7 +432,7 @@ def run_ssvi_and_dupire_validation():
         for it, t in enumerate(t_eval):
             theta = 0.04 * t  # Linear term structure proxy
             w_eval[it, :] = params.total_variance(k_eval, theta)
-        
+
         lv_mat = extract_dupire_local_volatility(k_eval, t_eval, w_eval)
         valid_mask = ~np.isnan(lv_mat) & (lv_mat > 0)
         valid_lvs = lv_mat[valid_mask]
@@ -482,7 +475,7 @@ def run_gs_quant_comparison():
     print("="*80)
     import gs_quant
     print(f"  GS Quant Version: {gs_quant.__version__}")
-    
+
     # Scenarios: Pricing, Greeks, IV
     scenarios = [
         {"name": "ATM Standard", "spot": 100.0, "strike": 100.0, "t": 1.0, "r": 0.05, "q": 0.0, "vol": 0.20},
@@ -506,7 +499,7 @@ def run_gs_quant_comparison():
         d2 = d1 - v*math.sqrt(t) if t > 0 and v > 0 else 0
         from scipy.stats import norm
         ref_price = s*math.exp(-q*t)*norm.cdf(d1) - k*math.exp(-r*t)*norm.cdf(d2) if t > 0 and v > 0 else max(0.0, s - k)
-        
+
         abs_err = abs(k_price - ref_price)
         print(f"    [{sc['name']:18s}] Kuwala={k_price:10.6f} | Ref={ref_price:10.6f} | Err={abs_err:.2e} | Latency={k_latency_ns}ns")
         record_test("CONTROLLED_NUMERICAL", passed=(abs_err < 1e-10))
@@ -540,20 +533,20 @@ def run_controlled_extreme_numerical_campaign():
     print("="*80)
     n_cases = 100_000
     rng = np.random.default_rng(42)
-    
+
     s = rng.uniform(10.0, 500.0, n_cases)
     k = rng.uniform(10.0, 500.0, n_cases)
     t = rng.uniform(0.01, 5.0, n_cases)
     r = rng.uniform(-0.02, 0.10, n_cases)
     q = rng.uniform(0.0, 0.05, n_cases)
     v = rng.uniform(0.05, 1.20, n_cases)
-    
+
     # 1. Put-Call Parity Invariant
     c = black_scholes(s, k, t, r, q, v, is_call=True)
     p = black_scholes(s, k, t, r, q, v, is_call=False)
     parity_target = s * np.exp(-q * t) - k * np.exp(-r * t)
     parity_err = np.abs((c - p) - parity_target)
-    
+
     passed_parity = (parity_err < 1e-9).sum()
     print(f"  Put-Call Parity (N={n_cases:,}): Passed={passed_parity:,} / {n_cases:,} (Max Err={np.max(parity_err):.2e})")
     for ok in (parity_err < 1e-9):
@@ -566,12 +559,12 @@ def run_failure_recovery_tests():
     print("="*80)
     store_dir = Path("research/temp_storage/recovery_test")
     store_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # 1. Corrupted Parquet handling
     corrupt_file = store_dir / "corrupt.parquet"
     with open(corrupt_file, "wb") as f:
         f.write(b"PAR1CORRUPTED_GARBAGE_PAYLOAD_NOT_A_VALID_PARQUET_FILE")
-    
+
     try:
         ds = DataStore(db_path=store_dir / "test.duckdb")
         # Attempt to scan corrupted file
@@ -603,7 +596,7 @@ def main():
     run_gs_quant_comparison()
     run_controlled_extreme_numerical_campaign()
     run_failure_recovery_tests()
-    
+
     total_time = time.perf_counter() - t_start
     print("\n" + "="*80)
     print("  FINAL VALIDATION CAMPAIGN SUMMARY")
@@ -611,7 +604,7 @@ def main():
     total_tests = sum(RESULTS["counts"].values())
     total_passed = sum(RESULTS["passed"].values())
     total_failed = sum(RESULTS["failed"].values())
-    
+
     print(f"Total Execution Time: {total_time:.2f} seconds")
     print(f"Total Executed Test Cases: {total_tests:,}")
     print(f"  Total Passed: {total_passed:,} ({total_passed/max(1, total_tests)*100:.2f}%)")

@@ -1,6 +1,6 @@
+import glob
 import os
 import subprocess
-import glob
 
 # 1. Locate java.exe in Coursier cache
 coursier_dir = os.path.expanduser(r"~\AppData\Local\Coursier")

@@ -6,12 +6,11 @@ Tests noisy, malformed, crossed-spread, and inverted real-world market structure
 from __future__ import annotations
 
 import numpy as np
-import pytest
 import pandas as pd
 
-from kuwala.data.curves import NelsonSiegelCurve, CubicSplineCurve
-from kuwala.diagnostics.arbitrage import diagnose_surface, check_butterfly_slice, check_calendar_arbitrage
+from kuwala.data.curves import CubicSplineCurve, NelsonSiegelCurve
 from kuwala.data.microstructure import aggregate_ticks_to_bars
+from kuwala.diagnostics.arbitrage import check_butterfly_slice, diagnose_surface
 
 
 class TestAdversarialMarketStructures:
