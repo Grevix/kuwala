@@ -335,7 +335,11 @@ def run_campaign():
 
                     iv_val = (
                         float(row["impliedVolatility"])
-                        if ("impliedVolatility" in row and not np.isnan(row["impliedVolatility"]) and row["impliedVolatility"] > 0)
+                        if (
+                            "impliedVolatility" in row
+                            and not np.isnan(row["impliedVolatility"])
+                            and row["impliedVolatility"] > 0
+                        )
                         else 0.20
                     )
 
@@ -392,7 +396,11 @@ def run_campaign():
                     mid = (bid + ask) / 2.0 if (bid > 0 and ask > 0) else last_p
                     iv_val = (
                         float(row["impliedVolatility"])
-                        if ("impliedVolatility" in row and not np.isnan(row["impliedVolatility"]) and row["impliedVolatility"] > 0)
+                        if (
+                            "impliedVolatility" in row
+                            and not np.isnan(row["impliedVolatility"])
+                            and row["impliedVolatility"] > 0
+                        )
                         else 0.20
                     )
 
