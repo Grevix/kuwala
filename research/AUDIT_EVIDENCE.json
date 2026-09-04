@@ -1,0 +1,277 @@
+{
+  "timestamp": "2026-09-04T19:00:14.725146+00:00",
+  "fred_yield_curves": {
+    "status": "PASSED",
+    "maturities": [
+      0.08333333333333333,
+      0.25,
+      0.5,
+      1.0,
+      2.0,
+      5.0,
+      10.0,
+      30.0
+    ],
+    "nelson_siegel_rates": [
+      0.038920965142505336,
+      0.03929793386928529,
+      0.0398566435096759,
+      0.040932920886115734,
+      0.04285074719147153,
+      0.04664655911924201,
+      0.049241235973441155,
+      0.051254805333475845
+    ],
+    "cubic_spline_rates": [
+      0.0383,
+      0.0392,
+      0.04,
+      0.0416,
+      0.043899999999999995,
+      0.0454,
+      0.0479,
+      0.0527
+    ],
+    "ns_discount_factors": [
+      0.9967618404225069,
+      0.990223619113823,
+      0.9802689347456464,
+      0.9598935165947916,
+      0.9178681791378112,
+      0.791969185124112,
+      0.6111503000896685,
+      0.21488674437312608
+    ],
+    "cs_discount_factors": [
+      0.9968134212869322,
+      0.9902478635182347,
+      0.9801986733067553,
+      0.959253405204525,
+      0.9159440472151089,
+      0.7969207822901396,
+      0.6194024846927992,
+      0.20576922605990708
+    ],
+    "d0_is_unity": true,
+    "ns_discount_monotonic": true,
+    "cs_discount_monotonic": true
+  },
+  "yfinance_options_and_equities": {
+    "SPY": {
+      "status": "PASSED",
+      "underlying_price": 770.260009765625,
+      "expirations_available": 27,
+      "expirations_audited": 4,
+      "total_contracts_fetched": 994,
+      "valid_contracts": 696,
+      "rejected_contracts": 298,
+      "rejection_rate_pct": 29.98,
+      "forward_extraction": "Forward curve built with 3 expiry tenors"
+    },
+    "QQQ": {
+      "status": "PASSED",
+      "underlying_price": 718.22998046875,
+      "expirations_available": 27,
+      "expirations_audited": 4,
+      "total_contracts_fetched": 979,
+      "valid_contracts": 660,
+      "rejected_contracts": 319,
+      "rejection_rate_pct": 32.58,
+      "forward_extraction": "Forward curve built with 3 expiry tenors"
+    },
+    "AAPL": {
+      "status": "PASSED",
+      "underlying_price": 321.6700134277344,
+      "expirations_available": 20,
+      "expirations_audited": 4,
+      "total_contracts_fetched": 508,
+      "valid_contracts": 369,
+      "rejected_contracts": 139,
+      "rejection_rate_pct": 27.36,
+      "forward_extraction": "Forward curve built with 3 expiry tenors"
+    },
+    "MSFT": {
+      "status": "PASSED",
+      "underlying_price": 500.7449951171875,
+      "expirations_available": 19,
+      "expirations_audited": 4,
+      "total_contracts_fetched": 609,
+      "valid_contracts": 447,
+      "rejected_contracts": 162,
+      "rejection_rate_pct": 26.6,
+      "forward_extraction": "Forward curve built with 3 expiry tenors"
+    }
+  },
+  "adversarial_boundary_tests": [
+    {
+      "case": "Zero Spot",
+      "inputs": {
+        "spot": 0.0,
+        "strike": 100.0,
+        "ttm": 1.0,
+        "r": 0.05,
+        "vol": 0.2
+      },
+      "price": 0.0,
+      "delta": 0.0,
+      "gamma": 0.0,
+      "vega": 0.0,
+      "iv_roundtrip": null,
+      "status": "PASSED"
+    },
+    {
+      "case": "Zero Strike",
+      "inputs": {
+        "spot": 100.0,
+        "strike": 0.0,
+        "ttm": 1.0,
+        "r": 0.05,
+        "vol": 0.2
+      },
+      "price": 0.0,
+      "delta": 1.0,
+      "gamma": 0.0,
+      "vega": 0.0,
+      "iv_roundtrip": null,
+      "status": "PASSED"
+    },
+    {
+      "case": "Zero TTM",
+      "inputs": {
+        "spot": 100.0,
+        "strike": 100.0,
+        "ttm": 0.0,
+        "r": 0.05,
+        "vol": 0.2
+      },
+      "price": 0.0,
+      "delta": 0.0,
+      "gamma": 0.0,
+      "vega": 0.0,
+      "iv_roundtrip": null,
+      "status": "PASSED"
+    },
+    {
+      "case": "Zero Vol",
+      "inputs": {
+        "spot": 100.0,
+        "strike": 100.0,
+        "ttm": 1.0,
+        "r": 0.05,
+        "vol": 0.0
+      },
+      "price": 4.877057549928611,
+      "delta": 0.0,
+      "gamma": 0.0,
+      "vega": 0.0,
+      "iv_roundtrip": 0.009169393933979768,
+      "status": "PASSED"
+    },
+    {
+      "case": "Extreme High Vol",
+      "inputs": {
+        "spot": 100.0,
+        "strike": 100.0,
+        "ttm": 1.0,
+        "r": 0.05,
+        "vol": 25.0
+      },
+      "price": 100.0,
+      "delta": 1.0,
+      "gamma": 1.8317045652042092e-38,
+      "vega": 4.5792614130105234e-33,
+      "iv_roundtrip": 13.070071824901307,
+      "status": "PASSED"
+    },
+    {
+      "case": "Deep ITM Call",
+      "inputs": {
+        "spot": 1000.0,
+        "strike": 10.0,
+        "ttm": 1.0,
+        "r": 0.05,
+        "vol": 0.2
+      },
+      "price": 990.4877057549928,
+      "delta": 1.0,
+      "gamma": 4.4058010636409e-122,
+      "vega": 8.8116021272818e-117,
+      "iv_roundtrip": null,
+      "status": "PASSED"
+    },
+    {
+      "case": "Deep OTM Call",
+      "inputs": {
+        "spot": 10.0,
+        "strike": 1000.0,
+        "ttm": 1.0,
+        "r": 0.05,
+        "vol": 0.2
+      },
+      "price": 0.0,
+      "delta": 0.0,
+      "gamma": 4.405801063641356e-113,
+      "vega": 8.811602127282713e-112,
+      "iv_roundtrip": null,
+      "status": "PASSED"
+    },
+    {
+      "case": "Negative Rate",
+      "inputs": {
+        "spot": 100.0,
+        "strike": 100.0,
+        "ttm": 1.0,
+        "r": -0.01,
+        "vol": 0.2
+      },
+      "price": 7.513066707312689,
+      "delta": 0.5199388730625065,
+      "gamma": 0.019922195704738202,
+      "vega": 39.8443914094764,
+      "iv_roundtrip": 0.2000000000000164,
+      "status": "PASSED"
+    },
+    {
+      "case": "Ultra Short Maturity",
+      "inputs": {
+        "spot": 100.0,
+        "strike": 100.0,
+        "ttm": 1e-06,
+        "r": 0.05,
+        "vol": 0.2
+      },
+      "price": 0.007981396197280333,
+      "delta": 0.5001396311815114,
+      "gamma": 19.94711279831094,
+      "vega": 0.03989422559662188,
+      "iv_roundtrip": null,
+      "status": "PASSED"
+    },
+    {
+      "case": "Ultra Long Maturity",
+      "inputs": {
+        "spot": 100.0,
+        "strike": 100.0,
+        "ttm": 50.0,
+        "r": 0.05,
+        "vol": 0.2
+      },
+      "price": 92.31057247881961,
+      "delta": 0.9933358260776469,
+      "gamma": 0.00013193748982537592,
+      "vega": 13.193748982537594,
+      "iv_roundtrip": 0.19999999949708686,
+      "status": "PASSED"
+    }
+  ],
+  "property_based_invariants": {
+    "total_property_cases": 20000,
+    "put_call_parity_max_error": 1.1368683772161603e-13,
+    "put_call_parity_mean_error": 1.3942025312019268e-14,
+    "strike_monotonicity_pass_rate": 100.0,
+    "iv_roundtrip_samples": 1998,
+    "iv_roundtrip_max_error": 0.09092929269855976,
+    "iv_roundtrip_p99_error": 4.116379530473545e-06,
+    "iv_roundtrip_mean_error": 0.00016476041077427038
+  }
+}

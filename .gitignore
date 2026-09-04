@@ -8,6 +8,7 @@ __pycache__/
 *.dylib
 *.obj
 *.o
+*.exe
 
 # Distribution / packaging
 build/
@@ -41,6 +42,7 @@ Cargo.lock
 *.duckdb
 *.duckdb.wal
 *.csv
+!REAL_IV_VALIDATION.csv
 research/data/
 research_data/
 research/real_validation/
@@ -67,3 +69,10 @@ htmlcov/
 # Temporary / Scratch
 scratch/
 *.tmp
+
+# Scala / JVM build artifacts
+.scala-build/
+.bloop/
+.bsp/
+*.class
+*.tasty

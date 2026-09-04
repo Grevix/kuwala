@@ -1,0 +1,64 @@
+{
+  "hardware": {
+    "os": "Windows 11 (x86_64)",
+    "python": "3.14.3",
+    "rustc": "1.85.0+",
+    "msvc": "19.44 (Visual Studio 2022)"
+  },
+  "benchmarks": {
+    "black_scholes_rust": {
+      "10000": {
+        "duration_sec": 0.016124300000228686,
+        "throughput_ops_sec": 620181.9613786752
+      },
+      "100000": {
+        "duration_sec": 0.16687430000092718,
+        "throughput_ops_sec": 599253.4500485958
+      },
+      "1000000": {
+        "duration_sec": 2.116991799999596,
+        "throughput_ops_sec": 472368.38612232264
+      }
+    },
+    "greeks_rust": {
+      "10000": {
+        "duration_sec": 0.04656729999987874,
+        "throughput_ops_sec": 214742.96341050565
+      },
+      "100000": {
+        "duration_sec": 0.374844199999643,
+        "throughput_ops_sec": 266777.50382717734
+      },
+      "1000000": {
+        "duration_sec": 3.6597344999991037,
+        "throughput_ops_sec": 273243.86509465234
+      }
+    },
+    "iv_solver_rust": {
+      "10000": {
+        "duration_sec": 0.0517933000010089,
+        "throughput_ops_sec": 193075.16608915065
+      },
+      "100000": {
+        "duration_sec": 0.3064845000008063,
+        "throughput_ops_sec": 326280.77439393156
+      },
+      "500000": {
+        "duration_sec": 1.4263295000000653,
+        "throughput_ops_sec": 350550.1358556891
+      }
+    },
+    "microstructure_python_arrow": {
+      "100000": {
+        "duration_sec": 0.06899779999912425,
+        "bars_generated": 17,
+        "throughput_ticks_sec": 1449321.5725902745
+      },
+      "1000000": {
+        "duration_sec": 0.4680927999997948,
+        "bars_generated": 167,
+        "throughput_ticks_sec": 2136328.522892124
+      }
+    }
+  }
+}

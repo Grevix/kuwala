@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-09-04T19:08:27.824768+00:00",
+  "black_scholes": {
+    "workload": "Black-Scholes Pricing",
+    "dataset": "tests/golden/black_scholes.csv",
+    "cases": 10000,
+    "status": "PASSED",
+    "max_absolute_error": 1.1368683772161603e-12,
+    "mean_absolute_error": 6.082397594979389e-14,
+    "p99_absolute_error": 3.979039320256561e-13,
+    "tolerance": 1e-10
+  },
+  "greeks": {
+    "workload": "Analytical 1st & 2nd Order Greeks",
+    "dataset": "tests/golden/greeks.csv",
+    "cases": 80000,
+    "status": "PASSED",
+    "max_absolute_error": 4.831690603168681e-12,
+    "delta_max_error": 1.3877787807814457e-15,
+    "gamma_max_error": 3.885780586188048e-16,
+    "vega_max_error": 3.410605131648481e-13,
+    "vanna_max_error": 1.3655743202889425e-14,
+    "volga_max_error": 4.831690603168681e-12,
+    "charm_max_error": 4.933553565678039e-15,
+    "tolerance": 1e-10
+  },
+  "implied_volatility": {
+    "workload": "Implied Volatility Solver",
+    "dataset": "tests/golden/implied_vol.csv",
+    "cases": 5000,
+    "status": "PASSED",
+    "max_absolute_error": 0.0041639385865500644,
+    "p99_absolute_error": 2.2875461941351832e-09,
+    "mean_absolute_error": 8.403571416684408e-07,
+    "tolerance": 0.0001
+  }
+}

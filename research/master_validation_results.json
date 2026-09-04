@@ -1,0 +1,29 @@
+{
+  "total_cases": 107445,
+  "total_passed": 107425,
+  "total_failed": 20,
+  "runtime_seconds": 27.492525099999966,
+  "breakdown": {
+    "counts": {
+      "REAL_MARKET_DATA": 4976,
+      "REAL_MACRO_DATA": 33,
+      "REAL_TICK_DATA": 667,
+      "CONTROLLED_NUMERICAL": 101769,
+      "SYNTHETIC": 0
+    },
+    "passed": {
+      "REAL_MARKET_DATA": 4962,
+      "REAL_MACRO_DATA": 33,
+      "REAL_TICK_DATA": 667,
+      "CONTROLLED_NUMERICAL": 101763,
+      "SYNTHETIC": 0
+    },
+    "failed": {
+      "REAL_MARKET_DATA": 14,
+      "REAL_MACRO_DATA": 0,
+      "REAL_TICK_DATA": 0,
+      "CONTROLLED_NUMERICAL": 6,
+      "SYNTHETIC": 0
+    }
+  }
+}

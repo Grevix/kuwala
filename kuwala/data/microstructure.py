@@ -59,8 +59,12 @@ def aggregate_ticks_to_bars(
         has_spread = True
 
     # Resample
+    norm_freq = freq
+    if freq.endswith("m") and not freq.endswith("min") and not freq.endswith("ms"):
+        norm_freq = freq[:-1] + "min"
+
     df = df.set_index(time_col)
-    resampler = df.resample(freq)
+    resampler = df.resample(norm_freq)
 
     bars = pd.DataFrame()
     bars["open"] = resampler[price_col].first()

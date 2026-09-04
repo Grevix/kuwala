@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-09-04T18:58:05.528789+00:00",
+  "storage_stress_benchmark": {
+    "n_rows": 1000000,
+    "file_size_mb": 14.64,
+    "parquet_write_time_sec": 0.3776,
+    "pandas_scan_filter_sec": 0.4706,
+    "pandas_peak_ram_mb": 15.33,
+    "duckdb_direct_query_sec": 0.1472,
+    "duckdb_peak_ram_mb": 0.0,
+    "duckdb_memory_savings_factor": 153.3,
+    "duckdb_speedup_factor": 3.2
+  },
+  "leakage_and_validation": {
+    "status": "PASSED",
+    "n_samples": 1000,
+    "n_splits": 5,
+    "embargo_pct": 0.02,
+    "embargo_violations": 0,
+    "lookahead_leakage_prevented": true
+  }
+}
