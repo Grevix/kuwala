@@ -1,0 +1,61 @@
+{
+  "version": "0.2.0",
+  "timestamp": "2026-09-04T18:21:38.600640+00:00",
+  "total_cases": 1503506,
+  "passed": 1501756,
+  "failed": 1750,
+  "pass_rate": 99.88360538634366,
+  "duration_seconds": 69.37437899999895,
+  "phases": {
+    "Phase 1 (Real OHLCV)": {
+      "cases": 13805,
+      "passed": 13805,
+      "time": 25.623475399999734
+    },
+    "Phase 2 (Yield Curves)": {
+      "cases": 50000,
+      "passed": 50000,
+      "time": 24.506550599999173
+    },
+    "Phase 3 (Microstructure Bars)": {
+      "cases": 112201,
+      "passed": 112201,
+      "time": 0.5627395999999862
+    },
+    "Phase 4 (Realized Volatility)": {
+      "cases": 537500,
+      "passed": 537500,
+      "time": 8.857465900000534
+    },
+    "Phase 5 (Options & Forwards)": {
+      "cases": 20000,
+      "passed": 20000,
+      "time": 6.771875999998883
+    },
+    "Phase 6 (Rust IV Inversion)": {
+      "cases": 500000,
+      "passed": 498250,
+      "time": 1.408229399999982
+    },
+    "Phase 7 (Greeks Matrix)": {
+      "cases": 150000,
+      "passed": 150000,
+      "time": 1.371533499999714
+    },
+    "Phase 8 (SSVI Arbitrage)": {
+      "cases": 50000,
+      "passed": 50000,
+      "time": 0.14142329999958747
+    },
+    "Phase 9 (Dupire Local Vol)": {
+      "cases": 50000,
+      "passed": 50000,
+      "time": 0.0058107999993808335
+    },
+    "Phase 10 (Partitioned Storage)": {
+      "cases": 20000,
+      "passed": 20000,
+      "time": 0.12488970000049449
+    }
+  }
+}

@@ -1,10 +1,10 @@
 """
 Embedded DuckDB + Apache Arrow / Parquet Storage Engine for Kuwala.
+Supports Hive-partitioned out-of-core columnar storage and high-throughput analytical queries.
 """
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 from typing import Any, List, Optional, Union
 
@@ -32,6 +32,9 @@ class DataStore:
             self.base_dir = self.db_file.parent
 
         self.base_dir.mkdir(parents=True, exist_ok=True)
+        self.parquet_dir = self.base_dir / "partitioned"
+        self.parquet_dir.mkdir(parents=True, exist_ok=True)
+
         self.conn = duckdb.connect(str(self.db_file))
         self._init_schema()
 
@@ -39,7 +42,6 @@ class DataStore:
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS options_chains (
                 underlying VARCHAR,
-                timestamp TIMESTAMPTZ,
                 expiry TIMESTAMPTZ,
                 strike DOUBLE,
                 option_type VARCHAR,
@@ -50,10 +52,12 @@ class DataStore:
                 volume BIGINT,
                 open_interest BIGINT,
                 implied_volatility DOUBLE,
+                timestamp TIMESTAMPTZ,
                 spot DOUBLE,
                 rate DOUBLE,
                 dividend_yield DOUBLE,
                 ttm DOUBLE,
+                moneyness DOUBLE,
                 log_moneyness DOUBLE
             );
         """)
@@ -66,68 +70,115 @@ class DataStore:
                 last_updated TIMESTAMPTZ
             );
         """)
+        self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS bars (
+                underlying VARCHAR,
+                timestamp TIMESTAMPTZ,
+                freq VARCHAR,
+                open DOUBLE,
+                high DOUBLE,
+                low DOUBLE,
+                close DOUBLE,
+                volume DOUBLE,
+                vwap DOUBLE,
+                trades BIGINT
+            );
+        """)
 
     def write_chain(self, df_or_table: Union[pd.DataFrame, pa.Table]) -> int:
-        """
-        Store option chain observations into DuckDB and persist to Parquet partition.
-        """
-        if isinstance(df_or_table, pa.Table):
-            df = df_or_table.to_pandas()
-        else:
+        """Append an option chain dataset into DuckDB."""
+        if isinstance(df_or_table, pd.DataFrame):
             df = df_or_table.copy()
+        else:
+            df = df_or_table.to_pandas()
 
         if df.empty:
             return 0
 
-        self.conn.register("tmp_incoming_chain", df)
-        self.conn.execute("""
-            INSERT INTO options_chains
-            SELECT
-                underlying, timestamp, expiry, strike, option_type,
-                bid, ask, mid, last, volume, open_interest, implied_volatility,
-                spot, rate, dividend_yield, ttm, log_moneyness
-            FROM tmp_incoming_chain
-        """)
-        self.conn.unregister("tmp_incoming_chain")
+        self.conn.register("df_chain_view", df)
+        self.conn.execute("INSERT INTO options_chains BY NAME SELECT * FROM df_chain_view;")
+        self.conn.unregister("df_chain_view")
+        return len(df)
 
-        # Sanitize underlying for directory name
-        raw_symbol = str(df["underlying"].iloc[0])
-        safe_symbol = re.sub(r"[^a-zA-Z0-9_-]", "_", raw_symbol)
+    def write_partitioned_bars(self, df: pd.DataFrame, underlying: str, freq: str = "1d") -> int:
+        """
+        Write bars into Hive-partitioned Parquet files:
+        storage/partitioned/bars/underlying={underlying}/year={YYYY}/month={MM}/data.parquet
+        """
+        if df.empty:
+            return 0
 
-        parquet_dir = self.base_dir / "parquet" / f"underlying={safe_symbol}"
-        parquet_dir.mkdir(parents=True, exist_ok=True)
-        date_str = pd.to_datetime(df["timestamp"].iloc[0]).strftime("%Y%m%d_%H%M%S")
-        file_path = parquet_dir / f"chain_{date_str}.parquet"
+        df_copy = df.copy()
+        if "timestamp" in df_copy.columns:
+            ts_col = "timestamp"
+        elif "date" in df_copy.columns:
+            ts_col = "date"
+        else:
+            ts_col = df_copy.columns[0]
+
+        df_copy[ts_col] = pd.to_datetime(df_copy[ts_col], utc=True)
+        df_copy["underlying"] = underlying
+        df_copy["freq"] = freq
+        df_copy["year"] = df_copy[ts_col].dt.year
+        df_copy["month"] = df_copy[ts_col].dt.month
+
+        table = pa.Table.from_pandas(df_copy)
+        pq.write_to_dataset(
+            table,
+            root_path=str(self.parquet_dir / "bars"),
+            partition_cols=["underlying", "year", "month"],
+            use_dictionary=True,
+            compression="zstd",
+        )
+        return len(df)
+
+    def write_partitioned_chains(self, df_or_table: Union[pd.DataFrame, pa.Table], underlying: str) -> int:
+        """
+        Write option contract quotes into Hive-partitioned Parquet hierarchy.
+        """
+        if isinstance(df_or_table, pd.DataFrame):
+            df = df_or_table.copy()
+        else:
+            df = df_or_table.to_pandas()
+
+        if df.empty:
+            return 0
+
+        if "timestamp" in df.columns:
+            ts = pd.to_datetime(df["timestamp"], utc=True)
+        else:
+            ts = pd.Timestamp.now(tz="UTC")
+            df["timestamp"] = ts
+
+        df["underlying"] = underlying
+        df["year"] = ts.dt.year if isinstance(ts, pd.Series) else ts.year
+        df["month"] = ts.dt.month if isinstance(ts, pd.Series) else ts.month
 
         table = pa.Table.from_pandas(df)
-        pq.write_table(table, file_path)
+        pq.write_to_dataset(
+            table,
+            root_path=str(self.parquet_dir / "options"),
+            partition_cols=["underlying", "year", "month"],
+            use_dictionary=True,
+            compression="zstd",
+        )
         return len(df)
 
     def query(self, sql: str, params: Optional[List[Any]] = None) -> pd.DataFrame:
-        """
-        Execute an arbitrary SQL query against the DuckDB store with optional parameters.
-        """
+        """Execute parameterized SQL query in DuckDB."""
         if params is not None:
-            return self.conn.execute(sql, params).fetchdf()
-        return self.conn.execute(sql).fetchdf()
+            return self.conn.execute(sql, params).df()
+        return self.conn.execute(sql).df()
 
     def get_latest_chain(self, underlying: str) -> pd.DataFrame:
-        query = """
+        """Fetch latest option chain safely using parameterized query."""
+        sql = """
             SELECT * FROM options_chains
             WHERE underlying = ?
-            AND timestamp = (SELECT MAX(timestamp) FROM options_chains WHERE underlying = ?)
+            ORDER BY timestamp DESC, expiry ASC, strike ASC;
         """
-        return self.query(query, [underlying, underlying])
+        return self.conn.execute(sql, [underlying]).df()
 
     def close(self) -> None:
+        """Close database connection."""
         self.conn.close()
-
-
-_DEFAULT_STORE: Optional[DataStore] = None
-
-
-def get_store() -> DataStore:
-    global _DEFAULT_STORE
-    if _DEFAULT_STORE is None:
-        _DEFAULT_STORE = DataStore()
-    return _DEFAULT_STORE

@@ -2,11 +2,25 @@
 Kuwala: A Unified, Arbitrage-Checked Quantitative Options & Volatility Research Library.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 # Core submodules
 from kuwala import backtest, data, diagnostics, pricing, signals, volatility
-from kuwala.data import OptionChain, OptionQuote, OptionType, clean_chain, fetch
+from kuwala.data import (
+    CubicSplineCurve,
+    DataStore,
+    ForwardCurve,
+    NelsonSiegelCurve,
+    OptionChain,
+    OptionQuote,
+    OptionType,
+    YieldCurve,
+    aggregate_ticks_to_bars,
+    bootstrap_treasury_curve,
+    clean_chain,
+    extract_forward_from_chain,
+    fetch,
+)
 
 # Direct top-level ergonomic access
 from kuwala.pricing import OptionGreeks, black76, black_scholes, greeks
@@ -22,7 +36,7 @@ __all__ = [
     "diagnostics",
     "signals",
     "backtest",
-    # Top-level API functions
+    # Top-level API functions & models
     "black_scholes",
     "black76",
     "greeks",
@@ -39,4 +53,12 @@ __all__ = [
     "vrp",
     "realized_volatility",
     "validate_signal",
+    "YieldCurve",
+    "CubicSplineCurve",
+    "NelsonSiegelCurve",
+    "bootstrap_treasury_curve",
+    "ForwardCurve",
+    "extract_forward_from_chain",
+    "aggregate_ticks_to_bars",
+    "DataStore",
 ]
